@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Adobe. All rights reserved.
+ * Copyright 2026 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -11,20 +11,50 @@
  */
 
 /* eslint-env browser */
+/* eslint-disable sonarjs/cognitive-complexity */
+
+/** Max iterations for user/DOM-driven loops (CWE-606). */
+const MAX_LOOP_ITERATIONS = {
+  blockConfigRows: 100,
+  scriptAttrs: 20,
+  pictureBreakpoints: 10,
+  templateThemeClasses: 20,
+  blockColumns: 500,
+  icons: 200,
+  sections: 100,
+  sectionChildren: 200,
+  sectionMetaKeys: 50,
+  sectionMetaStyles: 30,
+  buildBlockRows: 100,
+  buildBlockCols: 50,
+  buildBlockVals: 20,
+  blocksPerSection: 50,
+  wrapTextAttributes: 30,
+};
+
 function sampleRUM(checkpoint, data) {
   // eslint-disable-next-line max-len
   const timeShift = () => (window.performance ? window.performance.now() : Date.now() - window.hlx.rum.firstReadTime);
   try {
     window.hlx = window.hlx || {};
-    if (!window.hlx.rum) {
+    if (!window.hlx.rum || !window.hlx.rum.collector) {
       sampleRUM.enhance = () => {};
-      const param = new URLSearchParams(window.location.search).get('rum');
-      const weight = (param === 'on' && 1)
-        || (window.SAMPLE_PAGEVIEWS_AT_RATE === 'high' && 10)
-        || (window.SAMPLE_PAGEVIEWS_AT_RATE === 'low' && 1000)
-        || 100;
-      const id = Math.random().toString(36).slice(-4);
-      const isSelected = param !== 'off' && Math.random() * weight < 1;
+      const params = new URLSearchParams(window.location.search);
+      const { currentScript } = document;
+      const rate = params.get('rum')
+        || window.SAMPLE_PAGEVIEWS_AT_RATE
+        || params.get('optel')
+        || (currentScript && currentScript.dataset.rate);
+      let weight = 100;
+      if (rate === 'on') weight = 1;
+      else if (rate === 'off') weight = 0;
+      else if (rate === 'high') weight = 10;
+      else if (rate === 'low') weight = 1000;
+      const id = (window.hlx.rum && window.hlx.rum.id) || crypto.randomUUID().slice(-9);
+      const isSelected = (window.hlx.rum && window.hlx.rum.isSelected)
+      // RUM id/sampling: Math.random() is intentional (analytics, not crypto)
+      // eslint-disable-next-line sonarjs/pseudo-random -- safe for RUM sampling
+        || (weight > 0 && Math.random() * weight < 1);
       // eslint-disable-next-line object-curly-newline, max-len
       window.hlx.rum = {
         weight,
@@ -40,15 +70,18 @@ function sampleRUM(checkpoint, data) {
           const errData = { source: 'undefined error' };
           try {
             errData.target = error.toString();
-            errData.source = error.stack
-              .split('\n')
-              .filter((line) => line.match(/https?:\/\//))
-              .shift()
-              .replace(/at ([^ ]+) \((.+)\)/, '$1@$2')
-              .replace(/ at /, '@')
-              .trim();
+            if (error.stack) {
+              errData.source = error.stack
+                .split('\n')
+                .filter((line) => line.match(/https?:\/\//))
+                .shift()
+                .replace(/at ([^ ]+) \((.+)\)/, '$1@$2')
+                .replace(/ at /, '@')
+                .trim();
+            }
           } catch (err) {
-            /* error structure was not as expected */
+            // eslint-disable-next-line no-console
+            console.error('error structure was not as expected', error, err);
           }
           return errData;
         };
@@ -69,6 +102,16 @@ function sampleRUM(checkpoint, data) {
           sampleRUM('error', errData);
         });
 
+        window.addEventListener('securitypolicyviolation', (e) => {
+          if (e.blockedURI.includes('helix-rum-enhancer') && e.disposition === 'enforce') {
+            const errData = {
+              source: 'csp',
+              target: e.blockedURI,
+            };
+            sampleRUM.sendPing('error', timeShift(), errData);
+          }
+        });
+
         sampleRUM.baseURL = sampleRUM.baseURL || new URL(window.RUM_BASE || '/', new URL('https://rum.hlx.page'));
         sampleRUM.collectBaseURL = sampleRUM.collectBaseURL || sampleRUM.baseURL;
         sampleRUM.sendPing = (ck, time, pingData = {}) => {
@@ -85,6 +128,7 @@ function sampleRUM(checkpoint, data) {
             ? `?${new URLSearchParams(window.RUM_PARAMS).toString()}`
             : '';
           const { href: url, origin } = new URL(
+            /* eslint-disable secure-coding/no-format-string-injection -- CWE-134: URL components */
             `.rum/${weight}${urlParams}`,
             sampleRUM.collectBaseURL,
           );
@@ -122,9 +166,13 @@ function sampleRUM(checkpoint, data) {
     }
     document.dispatchEvent(new CustomEvent('rum', { detail: { checkpoint, data } }));
   } catch (error) {
-    // something went awry
+    // eslint-disable-next-line no-console
+    console.error('something went awry', error);
   }
 }
+
+/** DOMPurify options for HTML. Use: DOMPurify.sanitize(html, DOMPURIFY). */
+export const DOMPURIFY = { USE_PROFILES: { html: true } };
 
 /**
  * Setup block utils.
@@ -139,12 +187,8 @@ function setup() {
   const scriptEl = document.querySelector('script[src$="/scripts/scripts.js"]');
   if (scriptEl) {
     try {
-      const scriptURL = new URL(scriptEl.src, window.location);
-      if (scriptURL.host === window.location.host) {
-        [window.hlx.codeBasePath] = scriptURL.pathname.split('/scripts/scripts.js');
-      } else {
-        [window.hlx.codeBasePath] = scriptURL.href.split('/scripts/scripts.js');
-      }
+      [window.hlx.codeBasePath] = new
+      URL(scriptEl.src).pathname.split('/scripts/scripts.js');
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(error);
@@ -186,6 +230,20 @@ function toCamelCase(name) {
   return toClassName(name).replace(/-([a-z])/g, (g) => g[1].toUpperCase());
 }
 
+/** Keys that must not be used for object/dataset assignment (CWE-915). */
+const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/**
+ * Returns true if key is safe for plain object or dataset assignment.
+ * @param {string} key Property name
+ * @returns {boolean}
+ */
+function isSafeObjectKey(key) {
+  return typeof key === 'string' && key.length > 0
+    && !UNSAFE_OBJECT_KEYS.has(key)
+    && !key.startsWith('__');
+}
+
 /**
  * Extracts the config from a block.
  * @param {Element} block The block element
@@ -193,8 +251,9 @@ function toCamelCase(name) {
  */
 // eslint-disable-next-line import/prefer-default-export
 function readBlockConfig(block) {
-  const config = {};
-  block.querySelectorAll(':scope > div').forEach((row) => {
+  const config = new Map();
+  const rows = block.querySelectorAll(':scope > div');
+  [...rows].slice(0, MAX_LOOP_ITERATIONS.blockConfigRows).forEach((row) => {
     if (row.children) {
       const cols = [...row.children];
       if (cols[1]) {
@@ -223,11 +282,11 @@ function readBlockConfig(block) {
             value = ps.map((p) => p.textContent);
           }
         } else value = row.children[1].textContent;
-        config[name] = value;
+        if (isSafeObjectKey(name)) config.set(name, value);
       }
     }
   });
-  return config;
+  return Object.fromEntries(config);
 }
 
 /**
@@ -259,11 +318,14 @@ async function loadScript(src, attrs) {
     if (!document.querySelector(`head > script[src="${src}"]`)) {
       const script = document.createElement('script');
       script.src = src;
-      if (attrs) {
-        // eslint-disable-next-line no-restricted-syntax, guard-for-in
-        for (const attr in attrs) {
-          script.setAttribute(attr, attrs[attr]);
-        }
+      if (attrs && typeof attrs === 'object' && !Array.isArray(attrs)) {
+        Object.keys(attrs)
+          .slice(0, MAX_LOOP_ITERATIONS.scriptAttrs)
+          .filter(isSafeObjectKey)
+          .forEach((attr) => {
+            const val = Object.getOwnPropertyDescriptor(attrs, attr)?.value;
+            if (val !== undefined) script.setAttribute(attr, String(val));
+          });
       }
       script.onload = resolve;
       script.onerror = reject;
@@ -302,33 +364,43 @@ function createOptimizedPicture(
   eager = false,
   breakpoints = [{ media: '(min-width: 600px)', width: '2000' }, { width: '750' }],
 ) {
-  const url = new URL(src, window.location.href);
+  const url = !src.startsWith('http') ? new URL(src, window.location.href) : new URL(src);
   const picture = document.createElement('picture');
-  const { pathname } = url;
-  const ext = pathname.substring(pathname.lastIndexOf('.') + 1);
+  const { origin, pathname } = url;
+  const ext = pathname.split('.').pop();
+  const cappedBreakpoints = breakpoints.slice(0, MAX_LOOP_ITERATIONS.pictureBreakpoints);
 
   // webp
-  breakpoints.forEach((br) => {
+  cappedBreakpoints.forEach((br) => {
     const source = document.createElement('source');
     if (br.media) source.setAttribute('media', br.media);
     source.setAttribute('type', 'image/webp');
-    source.setAttribute('srcset', `${pathname}?width=${br.width}&format=webply&optimize=medium`);
+    source.setAttribute(
+      'srcset',
+      `${origin}${pathname}?width=${br.width}&format=webply&optimize=medium`,
+    );
     picture.appendChild(source);
   });
 
   // fallback
-  breakpoints.forEach((br, i) => {
-    if (i < breakpoints.length - 1) {
+  cappedBreakpoints.forEach((br, i) => {
+    if (i < cappedBreakpoints.length - 1) {
       const source = document.createElement('source');
       if (br.media) source.setAttribute('media', br.media);
-      source.setAttribute('srcset', `${pathname}?width=${br.width}&format=${ext}&optimize=medium`);
+      source.setAttribute(
+        'srcset',
+        `${origin}${pathname}?width=${br.width}&format=${ext}&optimize=medium`,
+      );
       picture.appendChild(source);
     } else {
       const img = document.createElement('img');
       img.setAttribute('loading', eager ? 'eager' : 'lazy');
       img.setAttribute('alt', alt);
       picture.appendChild(img);
-      img.setAttribute('src', `${pathname}?width=${br.width}&format=${ext}&optimize=medium`);
+      img.setAttribute(
+        'src',
+        `${origin}${pathname}?width=${br.width}&format=${ext}&optimize=medium`,
+      );
     }
   });
 
@@ -340,9 +412,10 @@ function createOptimizedPicture(
  */
 function decorateTemplateAndTheme() {
   const addClasses = (element, classes) => {
-    classes.split(',').forEach((c) => {
-      element.classList.add(toClassName(c.trim()));
-    });
+    classes
+      .split(',')
+      .slice(0, MAX_LOOP_ITERATIONS.templateThemeClasses)
+      .forEach((c) => element.classList.add(toClassName(c.trim())));
   };
   const template = getMetadata('template');
   if (template) addClasses(document.body, template);
@@ -379,6 +452,7 @@ function wrapTextNodes(block) {
       .filter(({ nodeName }) => nodeName === 'class'
         || nodeName.startsWith('data-aue')
         || nodeName.startsWith('data-richtext'))
+      .slice(0, MAX_LOOP_ITERATIONS.wrapTextAttributes)
       .forEach(({ nodeName, nodeValue }) => {
         wrapper.setAttribute(nodeName, nodeValue);
         el.removeAttribute(nodeName);
@@ -386,55 +460,15 @@ function wrapTextNodes(block) {
     el.append(wrapper);
   };
 
-  block.querySelectorAll(':scope > div > div').forEach((blockColumn) => {
+  const blockColumns = block.querySelectorAll(':scope > div > div');
+  [...blockColumns].slice(0, MAX_LOOP_ITERATIONS.blockColumns).forEach((blockColumn) => {
     if (blockColumn.hasChildNodes()) {
       const hasWrapper = !!blockColumn.firstElementChild
         && validWrappers.some((tagName) => blockColumn.firstElementChild.tagName === tagName);
-      if (!hasWrapper) {
+      const pictureNeedsWrap = blockColumn.firstElementChild?.tagName === 'PICTURE'
+        && (blockColumn.children.length > 1 || !!blockColumn.textContent.trim());
+      if (!hasWrapper || pictureNeedsWrap) {
         wrap(blockColumn);
-      } else if (
-        blockColumn.firstElementChild.tagName === 'PICTURE'
-        && (blockColumn.children.length > 1 || !!blockColumn.textContent.trim())
-      ) {
-        wrap(blockColumn);
-      }
-    }
-  });
-}
-
-/**
- * Decorates paragraphs containing a single link as buttons.
- * @param {Element} element container element
- */
-function decorateButtons(element) {
-  element.querySelectorAll('a').forEach((a) => {
-    a.title = a.title || a.textContent;
-    if (a.href !== a.textContent) {
-      const up = a.parentElement;
-      const twoup = a.parentElement.parentElement;
-      if (!a.querySelector('img')) {
-        if (up.childNodes.length === 1 && (up.tagName === 'P' || up.tagName === 'DIV')) {
-          a.className = 'button'; // default
-          up.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'STRONG'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'P'
-        ) {
-          a.className = 'button primary';
-          twoup.classList.add('button-container');
-        }
-        if (
-          up.childNodes.length === 1
-          && up.tagName === 'EM'
-          && twoup.childNodes.length === 1
-          && twoup.tagName === 'P'
-        ) {
-          a.className = 'button secondary';
-          twoup.classList.add('button-container');
-        }
       }
     }
   });
@@ -447,6 +481,7 @@ function decorateButtons(element) {
  * @param {string} [alt] alt text to be added to icon
  */
 function decorateIcon(span, prefix = '', alt = '') {
+  if (span.hasChildNodes()) return; // already decorated
   const iconName = Array.from(span.classList)
     .find((c) => c.startsWith('icon-'))
     .substring(5);
@@ -467,48 +502,55 @@ function decorateIcon(span, prefix = '', alt = '') {
  */
 function decorateIcons(element, prefix = '') {
   const icons = element.querySelectorAll('span.icon');
-  icons.forEach((span) => {
+  [...icons].slice(0, MAX_LOOP_ITERATIONS.icons).forEach((span) => {
     decorateIcon(span, prefix);
   });
 }
+
+/* decorateSections moved to scripts.js */
 
 /**
  * Decorates all sections in a container element.
  * @param {Element} main The container element
  */
 function decorateSections(main) {
-  main.querySelectorAll(':scope > div:not([data-section-status])').forEach((section) => {
+  const sectionEls = main.querySelectorAll(':scope > div:not([data-section-status])');
+  [...sectionEls].slice(0, MAX_LOOP_ITERATIONS.sections).forEach((section) => {
     const wrappers = [];
     let defaultContent = false;
-    [...section.children].forEach((e) => {
+    [...section.children].slice(0, MAX_LOOP_ITERATIONS.sectionChildren).forEach((e) => {
       if ((e.tagName === 'DIV' && e.className) || !defaultContent) {
         const wrapper = document.createElement('div');
         wrappers.push(wrapper);
         defaultContent = e.tagName !== 'DIV' || !e.className;
         if (defaultContent) wrapper.classList.add('default-content-wrapper');
       }
-      wrappers[wrappers.length - 1].append(e);
+      wrappers.at(-1)?.append(e);
     });
     wrappers.forEach((wrapper) => section.append(wrapper));
     section.classList.add('section');
-    section.dataset.sectionStatus = 'initialized';
+    section.setAttribute('data-section-status', 'initialized');
     section.style.display = 'none';
 
     // Process section metadata
     const sectionMeta = section.querySelector('div.section-metadata');
     if (sectionMeta) {
       const meta = readBlockConfig(sectionMeta);
-      Object.keys(meta).forEach((key) => {
-        if (key === 'style') {
-          const styles = meta.style
-            .split(',')
-            .filter((style) => style)
-            .map((style) => toClassName(style.trim()));
-          styles.forEach((style) => section.classList.add(style));
-        } else {
-          section.dataset[toCamelCase(key)] = meta[key];
-        }
-      });
+      Object.entries(meta)
+        .slice(0, MAX_LOOP_ITERATIONS.sectionMetaKeys)
+        .forEach(([key, value]) => {
+          if (key === 'style') {
+            const styleStr = typeof value === 'string' ? value : '';
+            const styles = styleStr
+              .split(',')
+              .filter((style) => style)
+              .map((style) => toClassName(style.trim()))
+              .slice(0, MAX_LOOP_ITERATIONS.sectionMetaStyles);
+            styles.forEach((style) => section.classList.add(style));
+          } else if (isSafeObjectKey(key)) {
+            section.setAttribute(`data-${key}`, String(value ?? ''));
+          }
+        });
       sectionMeta.parentNode.remove();
     }
   });
@@ -524,15 +566,19 @@ function buildBlock(blockName, content) {
   const blockEl = document.createElement('div');
   // build image block nested div structure
   blockEl.classList.add(blockName);
-  table.forEach((row) => {
+  const cappedTable = table.slice(0, MAX_LOOP_ITERATIONS.buildBlockRows);
+  cappedTable.forEach((row) => {
     const rowEl = document.createElement('div');
-    row.forEach((col) => {
+    const cappedRow = [...row].slice(0, MAX_LOOP_ITERATIONS.buildBlockCols);
+    cappedRow.forEach((col) => {
       const colEl = document.createElement('div');
       const vals = col.elems ? col.elems : [col];
-      vals.forEach((val) => {
+      [...vals].slice(0, MAX_LOOP_ITERATIONS.buildBlockVals).forEach((val) => {
         if (val) {
           if (typeof val === 'string') {
-            colEl.innerHTML += val;
+            colEl.innerHTML += (window.DOMPurify
+              ? window.DOMPurify.sanitize(val, DOMPURIFY)
+              : val);
           } else {
             colEl.appendChild(val);
           }
@@ -597,8 +643,6 @@ function decorateBlock(block) {
     blockWrapper.classList.add(`${shortBlockName}-wrapper`);
     const section = block.closest('.section');
     if (section) section.classList.add(`${shortBlockName}-container`);
-    // eslint-disable-next-line no-use-before-define
-    decorateButtons(block);
   }
 }
 
@@ -607,7 +651,9 @@ function decorateBlock(block) {
  * @param {Element} main The container element
  */
 function decorateBlocks(main) {
-  main.querySelectorAll('div.section > div > div').forEach(decorateBlock);
+  const blocks = main.querySelectorAll('div.section > div > div');
+  const maxBlocks = MAX_LOOP_ITERATIONS.sections * MAX_LOOP_ITERATIONS.blocksPerSection;
+  [...blocks].slice(0, maxBlocks).forEach(decorateBlock);
 }
 
 /**
@@ -661,7 +707,8 @@ async function loadSection(section, loadCallback) {
   if (!status || status === 'initialized') {
     section.dataset.sectionStatus = 'loading';
     const blocks = [...section.querySelectorAll('div.block')];
-    for (let i = 0; i < blocks.length; i += 1) {
+    const blockLimit = Math.min(blocks.length, MAX_LOOP_ITERATIONS.blocksPerSection);
+    for (let i = 0; i < blockLimit; i += 1) {
       // eslint-disable-next-line no-await-in-loop
       await loadBlock(blocks[i]);
     }
@@ -675,10 +722,10 @@ async function loadSection(section, loadCallback) {
  * Loads all sections.
  * @param {Element} element The parent element of sections to load
  */
-
 async function loadSections(element) {
   const sections = [...element.querySelectorAll('div.section')];
-  for (let i = 0; i < sections.length; i += 1) {
+  const sectionLimit = Math.min(sections.length, MAX_LOOP_ITERATIONS.sections);
+  for (let i = 0; i < sectionLimit; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     await loadSection(sections[i]);
     if (i === 0 && sampleRUM.enhance) {
@@ -694,7 +741,6 @@ export {
   createOptimizedPicture,
   decorateBlock,
   decorateBlocks,
-  decorateButtons,
   decorateIcons,
   decorateSections,
   decorateTemplateAndTheme,

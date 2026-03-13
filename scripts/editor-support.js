@@ -2,15 +2,13 @@ import { showSlide } from '../blocks/carousel/carousel.js';
 import {
   decorateBlock,
   decorateBlocks,
-  decorateButtons,
   decorateIcons,
-  decorateSections,
   loadBlock,
   loadScript,
   loadSections,
 } from './aem.js';
 import { decorateRichtext } from './editor-support-rte.js';
-import { decorateMain } from './scripts.js';
+import { decorateMain, decorateSections, decorateButtons } from './scripts.js';
 
 function getState(block) {
   if (block.matches('.accordion')) {
@@ -47,7 +45,7 @@ function setState(block, state) {
     }
   }
 }
-
+/* eslint-disable sonarjs/cognitive-complexity */
 async function applyChanges(event) {
   // redecorate default content and blocks on patches (in the properties rail)
   const { detail } = event;
@@ -65,7 +63,10 @@ async function applyChanges(event) {
   await loadScript(`${window.hlx.codeBasePath}/scripts/dompurify.min.js`);
 
   const sanitizedContent = window.DOMPurify.sanitize(content, { USE_PROFILES: { html: true } });
-  const parsedUpdate = new DOMParser().parseFromString(sanitizedContent, 'text/html');
+  const parsedUpdate = document.implementation.createHTMLDocument('');
+  parsedUpdate.open();
+  parsedUpdate.write(sanitizedContent);
+  parsedUpdate.close();
   const element = document.querySelector(`[data-aue-resource="${resource}"]`);
 
   if (element) {
