@@ -53,9 +53,14 @@ const setupObservers = () => {
             }
             break;
           case 'accordion':
-            if (addedElements.length === 1 && addedElements[0].tagName === 'DETAILS') {
-              moveInstrumentation(removedElements[0], addedElements[0]);
-              moveInstrumentation(removedElements[0].querySelector('div'), addedElements[0].querySelector('summary'));
+            if (addedElements.length === 1 && addedElements[0].matches('li.accordion-item')) {
+              const removed = removedElements[0];
+              const added = addedElements[0];
+              moveInstrumentation(removed, added);
+              const addedLabel = added.querySelector('.accordion-item-label');
+              const addedBody = added.querySelector('.accordion-item-body');
+              if (removed.children[0] && addedLabel) moveInstrumentation(removed.children[0], addedLabel);
+              if (removed.children[1] && addedBody) moveInstrumentation(removed.children[1], addedBody);
             }
             break;
           case 'carousel':
