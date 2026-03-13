@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint-disable sonarjs/cognitive-complexity */
 import { showSlide } from '../../blocks/carousel/carousel.js';
 import { moveInstrumentation } from './ue-utils.js';
 
