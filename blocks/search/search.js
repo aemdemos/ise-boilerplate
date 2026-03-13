@@ -2,7 +2,6 @@ import {
   createOptimizedPicture,
   decorateIcons,
 } from '../../scripts/aem.js';
-import { fetchPlaceholders } from '../../scripts/placeholders.js';
 
 const searchParams = new URLSearchParams(window.location.search);
 
@@ -143,7 +142,7 @@ async function renderResults(block, config, filteredData, searchTerms) {
   } else {
     const noResultsMessage = document.createElement('li');
     searchResults.classList.add('no-results');
-    noResultsMessage.textContent = config.placeholders.searchNoResults || 'No results found.';
+    noResultsMessage.textContent = 'No results found.';
     searchResults.append(noResultsMessage);
   }
 }
@@ -220,9 +219,8 @@ function searchInput(block, config) {
   input.setAttribute('type', 'search');
   input.className = 'search-input';
 
-  const searchPlaceholder = config.placeholders.searchPlaceholder || 'Search...';
-  input.placeholder = searchPlaceholder;
-  input.setAttribute('aria-label', searchPlaceholder);
+  input.placeholder = 'Search...';
+  input.setAttribute('aria-label', 'Search...');
 
   input.addEventListener('input', (e) => {
     handleSearch(e, block, config);
@@ -251,11 +249,10 @@ function searchBox(block, config) {
 }
 
 export default async function decorate(block) {
-  const placeholders = await fetchPlaceholders();
   const source = block.querySelector('a[href]')?.href || `${window.hlx.codeBasePath}/query-index.json`;
   block.innerHTML = '';
   block.append(
-    searchBox(block, { source, placeholders }),
+    searchBox(block, { source }),
     searchResultsContainer(block),
   );
 

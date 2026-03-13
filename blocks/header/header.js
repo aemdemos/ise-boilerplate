@@ -1,5 +1,4 @@
 import { getMetadata } from '../../scripts/aem.js';
-import { fetchPlaceholders } from '../../scripts/placeholders.js';
 import { loadFragment } from '../fragment/fragment.js';
 
 // media query match that indicates mobile/tablet width
@@ -140,10 +139,7 @@ async function buildBreadcrumbsFromNavTree(nav, currentUrl) {
     crumbs.unshift({ title: getMetadata('og:title'), url: currentUrl });
   }
 
-  const placeholders = await fetchPlaceholders();
-  const homePlaceholder = placeholders.breadcrumbsHomeLabel || 'Home';
-
-  crumbs.unshift({ title: homePlaceholder, url: homeUrl });
+  crumbs.unshift({ title: 'Home', url: homeUrl });
 
   // last link is current page and should not be linked
   if (crumbs.length > 1) {
