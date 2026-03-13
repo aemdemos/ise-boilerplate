@@ -1,9 +1,7 @@
 import {
   loadHeader,
   loadFooter,
-  decorateButtons,
   decorateIcons,
-  decorateSections,
   decorateBlocks,
   decorateTemplateAndTheme,
   getMetadata,
@@ -11,9 +9,46 @@ import {
   loadSection,
   loadSections,
   loadCSS,
+  readBlockConfig,
+  toClassName,
+  loadScript,
 } from './aem.js';
 
+/** Max sections/children to process (CWE-770). */
+const MAX_SECTIONS = 100;
+const MAX_SECTION_CHILDREN = 200;
+
+/** Keys that must not be used for object/dataset assignment (CWE-915). */
+const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 /**
+ * Returns true if key is safe for plain object or dataset assignment.
+ * @param {string} key Property name
+ * @returns {boolean}
+ */
+function isSafeObjectKey(key) {
+  return typeof key === 'string' && key.length > 0
+    && !UNSAFE_OBJECT_KEYS.has(key)
+    && !key.startsWith('__');
+}
+
+// DOMPurify loaded once for HTML sanitization (mitigates DOM XSS from contentMap/dataset)
+let domPurifyReady = null;
+
+/**
+ * Ensures DOMPurify is loaded. Resolves with the script load. Safe to call multiple times.
+ * @returns {Promise<void>}
+ */
+export async function ensureDOMPurify() {
+  if (!domPurifyReady) {
+    const base = window.hlx?.codeBasePath ?? '';
+    domPurifyReady = loadScript(`${base}/scripts/dompurify.min.js`);
+  }
+  return domPurifyReady;
+}
+
+/**
+ * Universal Editor use
  * Moves all the attributes from a given elmenet to another given element.
  * @param {Element} from the element to copy attributes from
  * @param {Element} to the element to copy attributes to
@@ -27,12 +62,13 @@ export function moveAttributes(from, to, attributes) {
     const value = from.getAttribute(attr);
     if (value) {
       to?.setAttribute(attr, value);
-      from.removeAttribute(attr);
+      from?.removeAttribute(attr);
     }
   });
 }
 
 /**
+ * Universal Editor use
  * Move instrumentation attributes from a given element to another given element.
  * @param {Element} from the element to copy attributes from
  * @param {Element} to the element to copy attributes to
@@ -48,15 +84,33 @@ export function moveInstrumentation(from, to) {
 }
 
 /**
+ * Builds hero block and prepends to main in a new section.
+ * @param {Element} main The container element */
+
+/* uncomment if using autoblocking in DA, and add to buildAutoBlocks(main).
+
+function buildHeroBlock(main) {
+  const h1 = main.querySelector('h1');
+  const picture = main.querySelector('picture');
+  // eslint-disable-next-line no-bitwise
+  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
+    // Check if h1 or picture is already inside a hero block
+    if (h1.closest('.hero') || picture.closest('.hero')) {
+      return; // Don't create a duplicate hero block
+    }
+    const section = document.createElement('div');
+    section.append(buildBlock('hero', { elems: [picture, h1] }));
+    main.prepend(section);
+  }
+}
+*/
+
+/**
  * load fonts.css and set a session storage flag
  */
 async function loadFonts() {
   await loadCSS(`${window.hlx.codeBasePath}/styles/fonts.css`);
-  try {
-    if (!window.location.hostname.includes('localhost')) sessionStorage.setItem('fonts-loaded', 'true');
-  } catch (e) {
-    // do nothing
-  }
+  if (!window.location.hostname.includes('localhost')) sessionStorage.setItem('fonts-loaded', 'true');
 }
 
 function autolinkModals(doc) {
@@ -74,9 +128,27 @@ function autolinkModals(doc) {
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
  */
-function buildAutoBlocks() {
+function buildAutoBlocks(main) {
   try {
-    // TODO: add auto block, if needed
+    // auto load `*/fragments/*` references
+    const fragments = [...main.querySelectorAll('a[href*="/fragments/"]')].filter((f) => !f.closest('.fragment'));
+    if (fragments.length > 0) {
+      // eslint-disable-next-line import/no-cycle
+      import('../blocks/fragment/fragment.js').then(({ loadFragment }) => {
+        fragments.forEach(async (fragment) => {
+          try {
+            const { pathname } = new URL(fragment.href);
+            const frag = await loadFragment(pathname);
+            fragment.parentElement.replaceWith(...frag.children);
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Fragment loading failed', error);
+          }
+        });
+      });
+    }
+
+    // buildHeroBlock(main); uncomment if autoblocking the hero
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
@@ -96,18 +168,116 @@ function a11yLinks(main) {
 }
 
 /**
+ * Decorates formatted links to style them as buttons.
+ * @param {HTMLElement} main The main container element
+ */
+export function decorateButtons(main) {
+  main.querySelectorAll('p a[href]').forEach((a) => {
+    a.title = a.title || a.textContent;
+    const p = a.closest('p');
+    const text = a.textContent.trim();
+
+    // quick structural checks
+    if (a.querySelector('img') || p.textContent.trim() !== text) return;
+
+    // skip URL display links
+    try {
+      if (new URL(a.href).href === new URL(text, window.location).href) return;
+    } catch { /* continue */ }
+
+    // require authored formatting for buttonization
+    const strong = a.closest('strong');
+    const em = a.closest('em');
+    if (!strong && !em) return;
+
+    p.className = 'button-wrapper';
+    a.className = 'button';
+    if (strong && em) { // high-impact call-to-action
+      a.classList.add('accent');
+      const outer = strong.contains(em) ? strong : em;
+      outer.replaceWith(a);
+    } else if (strong) {
+      a.classList.add('primary');
+      strong.replaceWith(a);
+    } else {
+      a.classList.add('secondary');
+      em.replaceWith(a);
+    }
+  });
+}
+
+/**
+ * Decorates all sections in a container element.
+ * @param {Element} main The container element
+ */
+/* eslint-disable sonarjs/cognitive-complexity */
+export function decorateSections(main) {
+  const sectionEls = main.querySelectorAll(':scope > div');
+  const sectionLimit = Math.min(sectionEls.length, MAX_SECTIONS);
+  for (let si = 0; si < sectionLimit; si += 1) {
+    const section = sectionEls.item(si);
+    const wrappers = [];
+    let defaultContent = false;
+    // Snapshot children so moving nodes during iteration doesn't invalidate indices
+    const sectionChildren = [...section.children].slice(0, MAX_SECTION_CHILDREN);
+    for (const e of sectionChildren) {
+      // from the da boilerplate
+      if (e.classList.contains('richtext')) {
+        e.removeAttribute('class');
+        if (!defaultContent) {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('default-content-wrapper');
+          wrappers.push(wrapper);
+          defaultContent = true;
+        } // end da boilerplate
+      } else if (e.tagName === 'DIV' || !defaultContent) {
+        const wrapper = document.createElement('div');
+        wrappers.push(wrapper);
+        defaultContent = e.tagName !== 'DIV';
+        if (defaultContent) wrapper.classList.add('default-content-wrapper');
+      }
+      wrappers.at(-1)?.append(e);
+    }
+
+    // Add wrapped content back
+    wrappers.forEach((wrapper) => section.append(wrapper));
+    section.classList.add('section');
+    section.setAttribute('data-section-status', 'initialized');
+    section.style.display = 'none';
+
+    // Process section metadata
+    const sectionMeta = section.querySelector('div.section-metadata');
+    if (sectionMeta) {
+      const meta = readBlockConfig(sectionMeta);
+      Object.entries(meta).forEach(([key, value]) => {
+        if (key === 'style') {
+          const styleStr = typeof value === 'string' ? value : '';
+          const styles = styleStr
+            .split(',')
+            .filter((style) => style)
+            .map((style) => toClassName(style.trim()));
+          styles.forEach((style) => section.classList.add(style));
+        } else if (isSafeObjectKey(key)) {
+          section.setAttribute(`data-${key}`, String(value ?? ''));
+        }
+      });
+      sectionMeta.parentNode.remove();
+    }
+  }
+}
+
+/**
  * Decorates the main element.
  * @param {Element} main The main element
  */
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   // hopefully forward compatible button decoration
-  decorateButtons(main);
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
   decorateBlocks(main);
-  // add aria-label to links
+  decorateButtons(main);
   a11yLinks(main);
 }
 
@@ -128,13 +298,9 @@ async function loadEager(doc) {
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 
-  try {
-    /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
-    if (window.innerWidth >= 900 || sessionStorage.getItem('fonts-loaded')) {
-      loadFonts();
-    }
-  } catch (e) {
-    // do nothing
+  /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
+  if (window.innerWidth >= 900 || sessionStorage.getItem('fonts-loaded')) {
+    loadFonts();
   }
 }
 
@@ -165,14 +331,57 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
-  window.setTimeout(() => import('./delayed.js'), 3000);
-  // load anything that can be postponed to the latest here
+  const importDelayed = () => import('./delayed.js');
+
+  if ('requestIdleCallback' in window) {
+    // prevents INP/TBT issues by only loading when CPU has capacity
+    window.requestIdleCallback(importDelayed, { timeout: 3000 });
+  } else {
+    window.setTimeout(importDelayed, 3000); // fallback 3-second timeout
+  }
 }
+
+/* DA specific sidekick
+async function loadSidekick() {
+  if (document.querySelector('aem-sidekick')) {
+    import('./sidekick.js');
+    return;
+  }
+
+  document.addEventListener('sidekick-ready', () => {
+    import('./sidekick.js');
+  });
+}
+  */
 
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();
+  /* loadSidekick(); DA specific */
 }
 
+// DA UE Editor support before page load
+if (window.location.hostname.includes('ue.da.live')) {
+  // eslint-disable-next-line import/no-unresolved
+  await import(`${window.hlx.codeBasePath}/ue/scripts/ue.js`).then(({ default: ue }) => ue());
+}
 loadPage();
+
+/* new DA NX stuff */
+const { searchParams, origin } = new URL(window.location.href);
+const branch = searchParams.get('nx') || 'main';
+
+/* eslint-disable browser-security/detect-mixed-content -- CWE-311: OWASP:A04-Cryptographic */
+export const NX_ORIGIN = branch === 'local' || origin.includes('localhost') ? 'http://localhost:6456/nx' : 'https://da.live/nx';
+
+(async function loadDa() {
+  /* eslint-disable import/no-unresolved */
+  if (searchParams.get('dapreview')) {
+    import('https://da.live/scripts/dapreview.js')
+      .then(({ default: daPreview }) => daPreview(loadPage));
+  }
+  if (searchParams.get('daexperiment')) {
+    import(`${NX_ORIGIN}/public/plugins/exp/exp.js`);
+  }
+}());

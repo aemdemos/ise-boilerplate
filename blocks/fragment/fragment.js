@@ -4,13 +4,16 @@
  * https://www.aem.live/developer/block-collection/fragment
  */
 
+// eslint-disable-next-line import/no-cycle
 import {
   decorateMain,
+  ensureDOMPurify,
   moveInstrumentation,
 } from '../../scripts/scripts.js';
 
 import {
   loadSections,
+  DOMPURIFY,
 } from '../../scripts/aem.js';
 
 /**
@@ -19,16 +22,20 @@ import {
  * @returns {Promise<HTMLElement>} The root element of the fragment
  */
 export async function loadFragment(path) {
-  if (path && path.startsWith('/')) {
+  if (path && path.startsWith('/') && !path.startsWith('//')) {
+    await ensureDOMPurify();
     const resp = await fetch(`${path}.plain.html`);
     if (resp.ok) {
       const main = document.createElement('main');
-      main.innerHTML = await resp.text();
+      main.innerHTML = window.DOMPurify.sanitize(await resp.text(), DOMPURIFY);
 
-      // reset base path for media to fragment base
+      // reset base path for media to fragment base (whitelist attr to avoid prototype pollution)
       const resetAttributeBase = (tag, attr) => {
+        if (attr !== 'src' && attr !== 'srcset') return;
         main.querySelectorAll(`${tag}[${attr}^="./media_"]`).forEach((elem) => {
-          elem[attr] = new URL(elem.getAttribute(attr), new URL(path, window.location)).href;
+          const { href } = new URL(elem.getAttribute(attr), new URL(path, window.location));
+          if (attr === 'src') elem.src = href;
+          else if (attr === 'srcset') elem.srcset = href;
         });
       };
       resetAttributeBase('img', 'src');
