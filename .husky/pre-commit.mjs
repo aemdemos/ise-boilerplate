@@ -11,8 +11,8 @@ const run = (cmd) => new Promise((resolve, reject) => exec(
 const changeset = await run('git diff --cached --name-only --diff-filter=ACMR');
 const modifiedFiles = changeset.split('\n').filter(Boolean);
 
-// check if there are any model files staged
-const modifiedPartials = modifiedFiles.filter((file) => file.match(/(^|\/)_.*.json/));
+// check if there are any model files staged (underscore-prefixed .json or ue/models/*.json)
+const modifiedPartials = modifiedFiles.filter((file) => file.match(/(^|\/)_.*\.json|^ue\/models\/.*\.json/));
 if (modifiedPartials.length > 0) {
   const output = await run('npm run build:json --silent');
   console.log(output);

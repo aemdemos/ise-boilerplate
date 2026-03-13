@@ -38,20 +38,20 @@
         {
           "component": "reference",
           "valueType": "string",
-          "name": "media_image",
+          "name": "backgroundImage",
           "label": "Background Image",
           "multi": false
         },
         {
           "component": "text",
           "valueType": "string",
-          "name": "media_imageAlt",
+          "name": "backgroundImageAlt",
           "value": "",
-          "label": "Bacgkround Alt"
+          "label": "Background Image Alt"
         },
         {
           "component": "richtext",
-          "name": "content_text",
+          "name": "content",
           "value": "",
           "label": "Text",
           "valueType": "string"
