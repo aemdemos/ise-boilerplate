@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   plugins: ['secure-coding', 'browser-security', 'sonarjs'],
   extends: [
-    'airbnb-base',
+    'airbnb-base', // for ESLint9 see https://github.com/airbnb/javascript/pull/2818/changes
     'plugin:json/recommended',
     'plugin:xwalk/recommended',
     'plugin:sonarjs/recommended-legacy',
@@ -84,7 +84,26 @@ module.exports = {
     'xwalk/max-cells': ['error', {
       section: 30, // section is a key-value block and over 4 is OK
     }],
+    // it's 2026, we can afford to have longer lines
     'max-len': ['error', { code: 220 }],
+    // it's 2026
+    'no-await-in-loop': 0,
+
+    // it's 2026, six is sensible (if they're short names)
+    'object-curly-newline': ['error', {
+      multiline: true,
+      minProperties: 6,
+      consistent: true,
+    }],
+    // allow external evergreen imports
+    'import/no-unresolved': ['error', {
+      ignore: ['^https?://'],
+    }],
+    // allow template literals to span lines without looking weird
+    'indent': ['error', 2, {
+      ignoredNodes: ['TemplateLiteral *'],
+      SwitchCase: 1,
+    }],
     'no-restricted-syntax': [
       'error',
       {

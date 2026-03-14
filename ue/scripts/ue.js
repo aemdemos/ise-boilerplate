@@ -11,7 +11,7 @@
  */
 
 /* eslint-disable sonarjs/cognitive-complexity */
-import { showSlide } from '../../blocks/carousel/carousel.js';
+import { showSlide } from '../../scripts/slider.js';
 import { moveInstrumentation } from './ue-utils.js';
 
 const setupObservers = () => {
