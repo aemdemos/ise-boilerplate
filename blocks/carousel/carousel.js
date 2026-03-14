@@ -1,4 +1,4 @@
-import { moveInstrumentation } from '../../scripts/scripts.js';
+import { moveInstrumentation, getBlockId } from '../../scripts/scripts.js';
 import { createSliderControls, initSlider, showSlide } from '../../scripts/slider.js';
 
 export { showSlide };
@@ -22,21 +22,23 @@ function createSlide(row, slideIndex, carouselId) {
   return slide;
 }
 
-let carouselId = 0;
 export default async function decorate(block) {
-  carouselId += 1;
-  block.setAttribute('id', `carousel-${carouselId}`);
-  const rows = block.querySelectorAll(':scope > div');
-  const isSingleSlide = rows.length < 2;
-
+  const blockId = getBlockId('carousel');
+  block.setAttribute('id', blockId);
+  block.setAttribute('aria-label', `carousel-${blockId}`);
   block.setAttribute('role', 'region');
   block.setAttribute('aria-roledescription', 'Carousel');
+
+  const rows = block.querySelectorAll(':scope > div');
+  const isSingleSlide = rows.length < 2;
 
   const container = document.createElement('div');
   container.classList.add('carousel-slides-container');
 
   const slidesWrapper = document.createElement('ul');
   slidesWrapper.classList.add('carousel-slides');
+  slidesWrapper.setAttribute('tabindex', '0');
+  slidesWrapper.setAttribute('aria-label', 'Carousel slides');
   block.prepend(slidesWrapper);
 
   if (!isSingleSlide) {
@@ -46,7 +48,7 @@ export default async function decorate(block) {
   }
 
   rows.forEach((row, idx) => {
-    const slide = createSlide(row, idx, carouselId);
+    const slide = createSlide(row, idx, blockId);
     moveInstrumentation(row, slide);
     slidesWrapper.append(slide);
     row.remove();
@@ -57,5 +59,12 @@ export default async function decorate(block) {
 
   if (!isSingleSlide) {
     initSlider(block);
+    slidesWrapper.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const current = parseInt(block.dataset.activeSlide, 10) || 0;
+      const next = e.key === 'ArrowLeft' ? current - 1 : current + 1;
+      e.preventDefault();
+      showSlide(block, next, 'smooth');
+    });
   }
 }

@@ -50,7 +50,7 @@
           "valueType": "string",
           "name": "placeholder_image",
           "label": "Placeholder Image",
-          "multi": true
+          "multi": false
         },
         {
           "component": "text",

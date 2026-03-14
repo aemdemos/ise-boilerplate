@@ -26,6 +26,34 @@ const DEFAULT_OPTIONS = {
   slideIndexAttr: 'slideIndex',
 };
 
+const ALLOWED_DATASET_ATTRS = new Set(['activeSlide', 'targetSlide', 'slideIndex']);
+const SLIDER_OPTION_KEYS = Object.keys(DEFAULT_OPTIONS);
+
+function getSliderOpts(options) {
+  const opts = new Map();
+  SLIDER_OPTION_KEYS.forEach((k) => {
+    let v = options[k] !== undefined ? options[k] : DEFAULT_OPTIONS[k];
+    if (k.endsWith('Attr') && (!ALLOWED_DATASET_ATTRS.has(v) || typeof v !== 'string')) {
+      v = DEFAULT_OPTIONS[k];
+    }
+    opts.set(k, v);
+  });
+  return opts;
+}
+
+function getDatasetAttr(el, attr) {
+  if (attr === 'activeSlide') return el.dataset.activeSlide;
+  if (attr === 'targetSlide') return el.dataset.targetSlide;
+  if (attr === 'slideIndex') return el.dataset.slideIndex;
+  return undefined;
+}
+
+function setDatasetAttr(el, attr, value) {
+  if (attr === 'activeSlide') el.dataset.activeSlide = value;
+  else if (attr === 'targetSlide') el.dataset.targetSlide = value;
+  else if (attr === 'slideIndex') el.dataset.slideIndex = value;
+}
+
 /**
  * Updates block and slide/indicator state to reflect the active slide.
  * @param {Element} block - Root block element
@@ -33,12 +61,14 @@ const DEFAULT_OPTIONS = {
  * @param {Object} options - Selector/dataset options (see DEFAULT_OPTIONS)
  */
 export function updateActiveSlide(block, slide, options = {}) {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
-  const slideIndex = parseInt(slide.dataset[opts.slideIndexAttr], 10);
+  const opts = getSliderOpts(options);
+  const slideIndexAttr = opts.get('slideIndexAttr');
+  const activeSlideAttr = opts.get('activeSlideAttr');
+  const slideIndex = parseInt(getDatasetAttr(slide, slideIndexAttr), 10);
   if (Number.isNaN(slideIndex)) return;
-  block.dataset[opts.activeSlideAttr] = slideIndex;
+  setDatasetAttr(block, activeSlideAttr, slideIndex);
 
-  const slides = block.querySelectorAll(opts.slideSelector);
+  const slides = block.querySelectorAll(opts.get('slideSelector'));
   slides.forEach((aSlide, idx) => {
     aSlide.setAttribute('aria-hidden', idx !== slideIndex);
     aSlide.querySelectorAll('a').forEach((link) => {
@@ -50,7 +80,7 @@ export function updateActiveSlide(block, slide, options = {}) {
     });
   });
 
-  const indicators = block.querySelectorAll(opts.indicatorItemSelector);
+  const indicators = block.querySelectorAll(opts.get('indicatorItemSelector'));
   indicators.forEach((indicator, idx) => {
     const btn = indicator.querySelector('button');
     if (!btn) return;
@@ -69,13 +99,16 @@ export function updateActiveSlide(block, slide, options = {}) {
  * @param {NodeListOf<Element>} slides - Slide elements
  * @returns {number}
  */
+const MAX_SLIDES = 1000;
+
 function getCurrentSlideIndexFromScroll(container, slides) {
-  const scrollLeft = container.scrollLeft;
-  for (let i = 0; i < slides.length; i += 1) {
+  const { scrollLeft } = container;
+  const len = Math.min(slides.length, MAX_SLIDES);
+  for (let i = 0; i < len; i += 1) {
     const slide = slides[i];
     if (scrollLeft < slide.offsetLeft + slide.offsetWidth) return i;
   }
-  return slides.length - 1;
+  return len - 1;
 }
 
 /**
@@ -86,14 +119,14 @@ function getCurrentSlideIndexFromScroll(container, slides) {
  * @param {Object} options - Selector options
  */
 export function showSlide(block, slideIndex = 0, behavior = 'smooth', options = {}) {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
-  const container = block.querySelector(opts.slidesContainer);
-  const slides = block.querySelectorAll(opts.slideSelector);
+  const opts = getSliderOpts(options);
+  const container = block.querySelector(opts.get('slidesContainer'));
+  const slides = block.querySelectorAll(opts.get('slideSelector'));
   if (!container || !slides.length) return;
 
   let realSlideIndex = slideIndex < 0 ? slides.length - 1 : slideIndex;
   if (slideIndex >= slides.length) realSlideIndex = 0;
-  const activeSlide = slides[realSlideIndex];
+  const activeSlide = slides.item(realSlideIndex);
 
   activeSlide.querySelectorAll('a').forEach((link) => link.removeAttribute('tabindex'));
   container.scrollTo({
@@ -109,52 +142,54 @@ export function showSlide(block, slideIndex = 0, behavior = 'smooth', options = 
  * @param {Object} options - Selector/dataset options
  */
 function bindEvents(block, options = {}) {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const opts = getSliderOpts(options);
+  const targetSlideAttr = opts.get('targetSlideAttr');
+  const activeSlideAttr = opts.get('activeSlideAttr');
 
-  const slideIndicators = block.querySelector(opts.indicatorsContainer);
+  const slideIndicators = block.querySelector(opts.get('indicatorsContainer'));
   if (slideIndicators) {
     slideIndicators.querySelectorAll('button').forEach((button) => {
       button.addEventListener('click', (e) => {
-        const indicator = e.currentTarget.closest(opts.indicatorItemSelector);
+        const indicator = e.currentTarget.closest(opts.get('indicatorItemSelector'));
         if (indicator) {
-          const target = parseInt(indicator.dataset[opts.targetSlideAttr], 10);
-          if (!Number.isNaN(target)) showSlide(block, target, 'smooth', opts);
+          const target = parseInt(getDatasetAttr(indicator, targetSlideAttr), 10);
+          if (!Number.isNaN(target)) showSlide(block, target, 'smooth', options);
         }
       });
     });
   }
 
-  const prevBtn = block.querySelector(opts.prevSelector);
+  const prevBtn = block.querySelector(opts.get('prevSelector'));
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
-      const container = block.querySelector(opts.slidesContainer);
-      const slides = block.querySelectorAll(opts.slideSelector);
+      const container = block.querySelector(opts.get('slidesContainer'));
+      const slides = block.querySelectorAll(opts.get('slideSelector'));
       const current = container && slides.length
         ? getCurrentSlideIndexFromScroll(container, slides)
-        : parseInt(block.dataset[opts.activeSlideAttr], 10) || 0;
-      showSlide(block, current - 1, 'smooth', opts);
+        : parseInt(getDatasetAttr(block, activeSlideAttr), 10) || 0;
+      showSlide(block, current - 1, 'smooth', options);
     });
   }
 
-  const nextBtn = block.querySelector(opts.nextSelector);
+  const nextBtn = block.querySelector(opts.get('nextSelector'));
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      const container = block.querySelector(opts.slidesContainer);
-      const slides = block.querySelectorAll(opts.slideSelector);
+      const container = block.querySelector(opts.get('slidesContainer'));
+      const slides = block.querySelectorAll(opts.get('slideSelector'));
       const current = container && slides.length
         ? getCurrentSlideIndexFromScroll(container, slides)
-        : parseInt(block.dataset[opts.activeSlideAttr], 10) || 0;
-      showSlide(block, current + 1, 'smooth', opts);
+        : parseInt(getDatasetAttr(block, activeSlideAttr), 10) || 0;
+      showSlide(block, current + 1, 'smooth', options);
     });
   }
 
   const slideObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) updateActiveSlide(block, entry.target, opts);
+      if (entry.isIntersecting) updateActiveSlide(block, entry.target, options);
     });
   }, { threshold: 0.5 });
 
-  block.querySelectorAll(opts.slideSelector).forEach((slide) => {
+  block.querySelectorAll(opts.get('slideSelector')).forEach((slide) => {
     slideObserver.observe(slide);
   });
 }
@@ -176,6 +211,16 @@ const DEFAULT_CONTROL_OPTIONS = {
   indicatorAriaLabel: (index, total) => `Show Slide ${index + 1} of ${total}`,
 };
 
+const CONTROL_OPTION_KEYS = Object.keys(DEFAULT_CONTROL_OPTIONS);
+
+function getControlOpts(options) {
+  const opts = new Map();
+  CONTROL_OPTION_KEYS.forEach((k) => {
+    opts.set(k, options[k] !== undefined ? options[k] : DEFAULT_CONTROL_OPTIONS[k]);
+  });
+  return opts;
+}
+
 /**
  * Creates the DOM for slider controls: indicators nav (ol with one li per slide) and prev/next buttons.
  * Caller is responsible for appending indicatorsNav and buttonsContainer to the block/container.
@@ -184,37 +229,39 @@ const DEFAULT_CONTROL_OPTIONS = {
  * @returns {{ indicatorsNav: HTMLElement, buttonsContainer: HTMLElement }}
  */
 export function createSliderControls(slideCount, options = {}) {
-  const opts = { ...DEFAULT_CONTROL_OPTIONS, ...options };
+  const opts = getControlOpts(options);
 
   const indicatorsNav = document.createElement('nav');
-  indicatorsNav.setAttribute('aria-label', opts.indicatorsAriaLabel);
+  indicatorsNav.setAttribute('aria-label', opts.get('indicatorsAriaLabel'));
   const list = document.createElement('ol');
-  list.classList.add(opts.listClass);
+  list.classList.add(opts.get('listClass'));
 
-  for (let idx = 0; idx < slideCount; idx += 1) {
+  const count = Math.min(Math.max(0, slideCount), MAX_SLIDES);
+  for (let idx = 0; idx < count; idx += 1) {
     const indicator = document.createElement('li');
-    indicator.classList.add(opts.indicatorItemClass);
+    indicator.classList.add(opts.get('indicatorItemClass'));
     indicator.setAttribute('data-target-slide', String(idx));
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.setAttribute('aria-label', typeof opts.indicatorAriaLabel === 'function'
-      ? opts.indicatorAriaLabel(idx, slideCount)
-      : opts.indicatorAriaLabel);
+    const labelFn = opts.get('indicatorAriaLabel');
+    btn.setAttribute('aria-label', typeof labelFn === 'function'
+      ? labelFn(idx, slideCount)
+      : labelFn);
     indicator.append(btn);
     list.append(indicator);
   }
   indicatorsNav.append(list);
 
   const buttonsContainer = document.createElement('div');
-  buttonsContainer.classList.add(opts.navButtonsWrapperClass);
+  buttonsContainer.classList.add(opts.get('navButtonsWrapperClass'));
   const prevBtn = document.createElement('button');
   prevBtn.type = 'button';
-  prevBtn.classList.add(opts.prevClass);
-  prevBtn.setAttribute('aria-label', opts.prevAriaLabel);
+  prevBtn.classList.add(opts.get('prevClass'));
+  prevBtn.setAttribute('aria-label', opts.get('prevAriaLabel'));
   const nextBtn = document.createElement('button');
   nextBtn.type = 'button';
-  nextBtn.classList.add(opts.nextClass);
-  nextBtn.setAttribute('aria-label', opts.nextAriaLabel);
+  nextBtn.classList.add(opts.get('nextClass'));
+  nextBtn.setAttribute('aria-label', opts.get('nextAriaLabel'));
   buttonsContainer.append(prevBtn, nextBtn);
 
   return { indicatorsNav, buttonsContainer };

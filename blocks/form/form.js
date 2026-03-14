@@ -26,21 +26,27 @@ async function createForm(formHref, submitHref) {
   return form;
 }
 
+const UNSAFE_PAYLOAD_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 function generatePayload(form) {
-  const payload = {};
+  const payload = new Map();
 
   [...form.elements].forEach((field) => {
-    if (field.name && field.type !== 'submit' && !field.disabled) {
-      if (field.type === 'radio') {
-        if (field.checked) payload[field.name] = field.value;
-      } else if (field.type === 'checkbox') {
-        if (field.checked) payload[field.name] = payload[field.name] ? `${payload[field.name]},${field.value}` : field.value;
-      } else {
-        payload[field.name] = field.value;
+    if (!field.name || field.type === 'submit' || field.disabled) return;
+    if (UNSAFE_PAYLOAD_KEYS.has(field.name)) return;
+
+    if (field.type === 'radio') {
+      if (field.checked) payload.set(field.name, field.value);
+    } else if (field.type === 'checkbox') {
+      if (field.checked) {
+        const prev = payload.get(field.name);
+        payload.set(field.name, prev ? `${prev},${field.value}` : field.value);
       }
+    } else {
+      payload.set(field.name, field.value);
     }
   });
-  return payload;
+  return Object.fromEntries(payload);
 }
 
 async function handleSubmit(form) {

@@ -4,13 +4,21 @@
  * https://www.hlx.live/developer/block-collection/table
  */
 
-import { moveInstrumentation } from '../../scripts/scripts.js';
-
+import { moveInstrumentation, getBlockId, ensureDOMPurify } from '../../scripts/scripts.js';
+import { DOMPURIFY } from '../../scripts/aem.js';
 /**
  *
  * @param {Element} block
  */
 export default async function decorate(block) {
+  const blockId = getBlockId('table');
+  block.setAttribute('id', blockId);
+  block.setAttribute('aria-label', `table-${blockId}`);
+  block.setAttribute('role', 'region');
+  block.setAttribute('aria-roledescription', 'Table');
+
+  await ensureDOMPurify();
+
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   const tbody = document.createElement('tbody');
@@ -24,7 +32,7 @@ export default async function decorate(block) {
       const td = document.createElement(i === 0 && header ? 'th' : 'td');
 
       if (i === 0) td.setAttribute('scope', 'column');
-      td.innerHTML = cell.innerHTML;
+      td.innerHTML = window.DOMPurify.sanitize(cell.innerHTML, DOMPURIFY);
       tr.append(td);
     });
     if (i === 0 && header) thead.append(tr);

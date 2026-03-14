@@ -10,12 +10,12 @@ function createFieldWrapper(fd) {
   return fieldWrapper;
 }
 
-const ids = [];
+const idCountBySlug = new Map();
 function generateFieldId(fd, suffix = '') {
   const slug = toClassName(`form-${fd.Name}${suffix}`);
-  ids[slug] = ids[slug] || 0;
-  const idSuffix = ids[slug] ? `-${ids[slug]}` : '';
-  ids[slug] += 1;
+  const count = idCountBySlug.get(slug) ?? 0;
+  idCountBySlug.set(slug, count + 1);
+  const idSuffix = count ? `-${count}` : '';
   return `${slug}${idSuffix}`;
 }
 
@@ -213,23 +213,23 @@ const createRadio = (fd) => {
   return { field, fieldWrapper };
 };
 
-const FIELD_CREATOR_FUNCTIONS = {
-  select: createSelect,
-  heading: createHeading,
-  plaintext: createPlaintext,
-  'text-area': createTextArea,
-  toggle: createToggle,
-  submit: createSubmit,
-  confirmation: createConfirmation,
-  fieldset: createFieldset,
-  checkbox: createCheckbox,
-  radio: createRadio,
-};
+const FIELD_CREATOR_MAP = new Map([
+  ['select', createSelect],
+  ['heading', createHeading],
+  ['plaintext', createPlaintext],
+  ['text-area', createTextArea],
+  ['toggle', createToggle],
+  ['submit', createSubmit],
+  ['confirmation', createConfirmation],
+  ['fieldset', createFieldset],
+  ['checkbox', createCheckbox],
+  ['radio', createRadio],
+]);
 
 export default async function createField(fd, form) {
   fd.Id = fd.Id || generateFieldId(fd);
   const type = fd.Type.toLowerCase();
-  const createFieldFunc = FIELD_CREATOR_FUNCTIONS[type] || createInput;
+  const createFieldFunc = FIELD_CREATOR_MAP.get(type) ?? createInput;
   const fieldElements = await createFieldFunc(fd, form);
 
   return fieldElements.fieldWrapper;

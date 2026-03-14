@@ -1,15 +1,18 @@
 // eslint-disable-next-line import/no-unresolved
-import { moveInstrumentation } from '../../scripts/scripts.js';
-
-// keep track globally of the number of tab blocks on the page
-let tabBlockCnt = 0;
+import { moveInstrumentation, getBlockId } from '../../scripts/scripts.js';
 
 export default async function decorate(block) {
+  const blockId = getBlockId('tabs');
+  block.setAttribute('id', blockId);
+  block.setAttribute('aria-label', `tabs-${blockId}`);
+  block.setAttribute('role', 'region');
+  block.setAttribute('aria-roledescription', 'Tabs');
+
   // build tablist
   const tablist = document.createElement('div');
   tablist.className = 'tabs-list';
   tablist.setAttribute('role', 'tablist');
-  tablist.id = `tablist-${tabBlockCnt += 1}`;
+  tablist.id = `tablist-${blockId}`;
 
   // the first cell of each row is the title of the tab
   const tabHeadings = [...block.children]
@@ -17,7 +20,7 @@ export default async function decorate(block) {
     .map((child) => child.firstElementChild);
 
   tabHeadings.forEach((tab, i) => {
-    const id = `tabpanel-${tabBlockCnt}-tab-${i + 1}`;
+    const id = `tabpanel-${blockId}-tab-${i + 1}`;
 
     // decorate tabpanel
     const tabpanel = block.children[i];
@@ -32,7 +35,7 @@ export default async function decorate(block) {
     button.className = 'tabs-tab';
     button.id = `tab-${id}`;
 
-    button.innerHTML = tab.innerHTML;
+    button.textContent = tab.textContent;
 
     button.setAttribute('aria-controls', id);
     button.setAttribute('aria-selected', !i);
