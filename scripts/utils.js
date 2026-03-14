@@ -10,45 +10,71 @@
 
 const IFRAME_WRAPPER_STYLE = 'left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;';
 const IFRAME_STYLE = 'border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;';
+const YOUTUBE_ALLOW = 'autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope';
 
-export function getYoutubeEmbedHtml(url, autoplay = false, background = false) {
-  const usp = new URLSearchParams(url.search);
-  let suffix = '';
-  if (background || autoplay) {
-    const suffixParams = {
-      autoplay: autoplay ? '1' : '0',
-      mute: background ? '1' : '0',
-      controls: background ? '0' : '1',
-      disablekb: background ? '1' : '0',
-      loop: background ? '1' : '0',
-      playsinline: background ? '1' : '0',
-    };
-    suffix = `&${Object.entries(suffixParams).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')}`;
-  }
-  let vid = usp.get('v') ? encodeURIComponent(usp.get('v')) : '';
-  const embed = url.pathname;
+function toPair(k, v) {
+  return `${k}=${encodeURIComponent(v)}`;
+}
+
+function buildQueryString(params, prefix) {
+  const pairs = Object.entries(params).map(([k, v]) => toPair(k, v)).join('&');
+  return `${prefix}${pairs}`;
+}
+
+function getYoutubeSuffix(autoplay, background) {
+  const params = {
+    autoplay: autoplay ? '1' : '0',
+    mute: background ? '1' : '0',
+    controls: background ? '0' : '1',
+    disablekb: background ? '1' : '0',
+    loop: background ? '1' : '0',
+    playsinline: background ? '1' : '0',
+  };
+  return buildQueryString(params, '&');
+}
+
+function getYoutubeVideoId(url) {
   if (url.origin.includes('youtu.be')) {
-    [, vid] = url.pathname.split('/');
+    const [, vid] = url.pathname.split('/');
+    return vid ? encodeURIComponent(vid) : '';
   }
-  const src = vid
-    ? `https://www.youtube.com/embed/${vid}?rel=0&v=${vid}${suffix}`
-    : `https://www.youtube.com${embed}`;
+  const v = new URLSearchParams(url.search).get('v');
+  return v ? encodeURIComponent(v) : '';
+}
+
+function getYoutubeSrc(url, autoplay, background) {
+  const vid = getYoutubeVideoId(url);
+  const suffix = (background || autoplay) ? getYoutubeSuffix(autoplay, background) : '';
+  if (vid) {
+    return `https://www.youtube.com/embed/${vid}?rel=0&v=${vid}${suffix}`;
+  }
+  return `https://www.youtube.com${url.pathname}`;
+}
+
+function wrapIframe(src, allow, title) {
   return `<div class="iframe-wrapper" style="${IFRAME_WRAPPER_STYLE}">
-<iframe src="${src}" style="${IFRAME_STYLE}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope; picture-in-picture" allowfullscreen="" scrolling="no" title="Content from Youtube" loading="lazy"></iframe>
+<iframe src="${src}" style="${IFRAME_STYLE}" allow="${allow}" allowfullscreen="" scrolling="no" title="${title}" loading="lazy"></iframe>
 </div>`;
 }
 
-export function getVimeoEmbedHtml(url, autoplay = false, background = false) {
+export function getYoutubeEmbedHtml(url, autoplay = false, background = false) {
+  const src = getYoutubeSrc(url, autoplay, background);
+  return wrapIframe(src, YOUTUBE_ALLOW, 'Content from Youtube');
+}
+
+function getVimeoSrc(url, autoplay, background) {
   const [, video] = url.pathname.split('/');
-  let suffix = '';
-  if (background || autoplay) {
-    const suffixParams = {
-      autoplay: autoplay ? '1' : '0',
-      background: background ? '1' : '0',
-    };
-    suffix = `?${Object.entries(suffixParams).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')}`;
-  }
+  const params = (background || autoplay)
+    ? { autoplay: autoplay ? '1' : '0', background: background ? '1' : '0' }
+    : {};
+  const suffix = Object.keys(params).length ? buildQueryString(params, '?') : '';
+  return `https://player.vimeo.com/video/${video}${suffix}`;
+}
+
+export function getVimeoEmbedHtml(url, autoplay = false, background = false) {
+  const src = getVimeoSrc(url, autoplay, background);
+  const allow = 'autoplay; fullscreen; picture-in-picture';
   return `<div class="iframe-wrapper" style="${IFRAME_WRAPPER_STYLE}">
-<iframe src="https://player.vimeo.com/video/${video}${suffix}" style="${IFRAME_STYLE}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Content from Vimeo" loading="lazy"></iframe>
+<iframe src="${src}" style="${IFRAME_STYLE}" frameborder="0" allow="${allow}" allowfullscreen title="Content from Vimeo" loading="lazy"></iframe>
 </div>`;
 }
