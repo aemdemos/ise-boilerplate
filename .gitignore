@@ -12,3 +12,5 @@ localhost-key.pem
 .vscode
 .cursor
 Trace*.json
+.wrangler
+.claude

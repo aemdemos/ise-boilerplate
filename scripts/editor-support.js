@@ -1,4 +1,4 @@
-import { showSlide } from '../blocks/carousel/carousel.js';
+import { showSlide } from './slider.js';
 import {
   decorateBlock,
   decorateBlocks,
