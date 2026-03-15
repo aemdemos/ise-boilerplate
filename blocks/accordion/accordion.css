@@ -1,3 +1,5 @@
+@import url('./accordion-tokens.css');
+
 .accordion > ul {
   list-style: none;
   margin: 0;
@@ -5,11 +7,11 @@
 }
 
 .accordion > ul > li {
-  border: 1px solid #dadada;
+  border: var(--accordion-item-border-width) solid var(--accordion-item-border-color);
 }
 
 .accordion > ul > li + li {
-  margin-top: 24px;
+  margin-top: var(--accordion-item-gap);
 }
 
 .accordion p {
@@ -18,11 +20,11 @@
 
 .accordion .accordion-item-label {
   position: relative;
-  padding: 0 16px;
-  padding-right: 46px;
+  padding: 0 var(--accordion-label-padding-x);
+  padding-right: var(--accordion-label-padding-right);
   cursor: pointer;
   overflow: auto;
-  transition: background-color 0.2s;
+  transition: background-color var(--accordion-transition-duration);
 }
 
 .accordion li.active .accordion-item-label {
@@ -38,13 +40,13 @@
   content: '';
   position: absolute;
   top: 50%;
-  right: 18px;
+  right: var(--accordion-label-icon-right);
   transform: translateY(-50%) rotate(135deg);
   width: 6px;
   height: 6px;
   border: 2px solid;
   border-width: 2px 2px 0 0;
-  transition: transform 0.2s;
+  transition: transform var(--accordion-transition-duration);
 }
 
 .accordion li.active .accordion-item-label::after {
@@ -53,11 +55,11 @@
 
 .accordion .accordion-item-body {
   display: none;
-  padding: 0 16px;
+  padding: 0 var(--accordion-body-padding-x);
 }
 
 .accordion li.active .accordion-item-body {
   display: block;
-  border-top: 1px solid #dadada;
+  border-top: var(--accordion-item-border-width) solid var(--accordion-item-border-color);
   background-color: var(--background-color);
 }

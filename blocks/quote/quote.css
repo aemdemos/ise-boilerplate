@@ -1,17 +1,19 @@
+@import url('./quote-tokens.css');
+
 .quote blockquote {
   margin: 0 auto;
-  padding: 0 24px;
-  max-width: 900px;
+  padding: var(--quote-padding);
+  max-width: var(--quote-max-width);
 }
 
 @media (width >= 900px) {
   .quote blockquote {
-    padding: 0 32px;
+    padding: var(--quote-padding-desktop);
   }
 }
 
 .quote blockquote .quote-quotation {
-  font-size: 120%;
+  font-size: var(--quote-quotation-font-size);
 }
 
 .quote blockquote .quote-quotation > :first-child {

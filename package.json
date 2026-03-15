@@ -25,6 +25,9 @@
     "url": "https://github.com/adobe/aem-block-collection/issues"
   },
   "homepage": "https://github.com/adobe/aem-block-collection#readme",
+  "overrides": {
+    "css-tree": "3.2.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/eslint-parser": "7.28.0",

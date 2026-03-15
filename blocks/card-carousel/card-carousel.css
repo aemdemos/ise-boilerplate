@@ -1,3 +1,5 @@
+@import url('./card-carousel-tokens.css');
+
 /* Slider layout: grid similar to .cards > ul, horizontal scroll */
 .card-carousel .card-carousel-slides-container {
   position: relative;
@@ -13,8 +15,8 @@
 .card-carousel .card-carousel-slides-container > ul.card-carousel-slides {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(257px, 1fr);
-  gap: 24px;
+  grid-auto-columns: minmax(var(--card-carousel-slide-min-width), 1fr);
+  gap: var(--card-carousel-gap);
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   overflow: scroll clip;
@@ -31,12 +33,12 @@
 
 /* Card styling (matches Cards block) */
 .card-carousel .card-carousel-slide {
-  border: 1px solid #dadada;
+  border: var(--card-carousel-card-border-width) solid var(--card-carousel-card-border-color);
   background-color: var(--background-color);
 }
 
 .card-carousel .cards-card-body {
-  margin: 16px;
+  margin: var(--card-carousel-card-body-margin);
 }
 
 .card-carousel .cards-card-image {
@@ -45,8 +47,8 @@
 
 .card-carousel .card-carousel-slide img {
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  aspect-ratio: var(--card-carousel-image-aspect-ratio);
+  object-fit: var(--card-carousel-image-object-fit);
 }
 
 /* Shared slide controls (indicators + prev/next) */
@@ -54,34 +56,34 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 12px;
-  padding: 12px;
+  gap: var(--card-carousel-indicators-gap);
+  padding: var(--card-carousel-indicators-padding);
   background-color: var(--light-color);
   line-height: 0;
 }
 
 .card-carousel .carousel-slide-indicator button {
-  width: 24px;
-  height: 24px;
+  width: var(--card-carousel-indicator-size);
+  height: var(--card-carousel-indicator-size);
   margin: 0;
   padding: 0;
   border-radius: 50%;
-  background-color: #dadada;
-  transition: background-color 0.2s;
+  background-color: var(--card-carousel-indicator-background);
+  transition: background-color var(--card-carousel-transition-duration);
 }
 
 .card-carousel .carousel-slide-indicator button:disabled,
 .card-carousel .carousel-slide-indicator button:hover,
 .card-carousel .carousel-slide-indicator button:focus-visible {
-  background-color: var(--text-color);
+  background-color: var(--card-carousel-indicator-active-background);
 }
 
 .card-carousel .carousel-navigation-buttons {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  left: 12px;
-  right: 12px;
+  left: var(--card-carousel-nav-inset);
+  right: var(--card-carousel-nav-inset);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -91,18 +93,18 @@
 /* stylelint-disable-next-line no-descending-specificity */
 .card-carousel .carousel-navigation-buttons button {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: var(--card-carousel-nav-button-size);
+  height: var(--card-carousel-nav-button-size);
   margin: 0;
   border-radius: 50%;
   padding: 0;
-  background-color: rgb(19 19 19 / 25%);
-  transition: background-color 0.2s;
+  background-color: var(--card-carousel-nav-button-background);
+  transition: background-color var(--card-carousel-transition-duration);
 }
 
 .card-carousel .carousel-navigation-buttons button:hover,
 .card-carousel .carousel-navigation-buttons button:focus-visible {
-  background-color: rgb(19 19 19 / 75%);
+  background-color: var(--card-carousel-nav-button-hover-background);
 }
 
 .card-carousel .carousel-navigation-buttons button::after {
@@ -126,7 +128,7 @@
 
 @media (width >= 600px) {
   .card-carousel .carousel-navigation-buttons {
-    left: 24px;
-    right: 24px;
+    left: var(--card-carousel-nav-inset-desktop);
+    right: var(--card-carousel-nav-inset-desktop);
   }
 }

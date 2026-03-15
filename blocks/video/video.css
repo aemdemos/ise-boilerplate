@@ -1,12 +1,14 @@
+@import url('./video-tokens.css');
+
 .video {
   text-align: center;
-  max-width: 900px;
-  margin: 24px auto;
+  max-width: var(--video-max-width);
+  margin: var(--video-margin);
 }
 
 .video[data-embed-loaded='false']:not(.placeholder) {
   /* reserve an approximate space to avoid extensive layout shifts */
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--video-aspect-ratio);
 }
 
 .video > div {
@@ -20,7 +22,7 @@
 
 .video .video-placeholder {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--video-aspect-ratio);
   position: relative;
 }
 
@@ -48,8 +50,8 @@
 .video .video-placeholder-play button {
   position: relative;
   display: block;
-  width: 44px;
-  height: 44px;
+  width: var(--video-placeholder-play-size);
+  height: var(--video-placeholder-play-size);
   border-radius: 50%;
   outline: 2px solid;
   padding: 0;
@@ -61,11 +63,11 @@
   box-sizing: border-box;
   position: absolute;
   width: 0;
-  height: 24px;
+  height: var(--video-placeholder-play-triangle-height);
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
-  border-left: 18px solid;
+  border-left: var(--video-placeholder-play-triangle-width) solid;
   top: 50%;
-  left: calc(50% + 2px);
+  left: calc(50% + var(--video-placeholder-play-left-offset));
   transform: translate(-50%, -50%);
 }

@@ -1,16 +1,18 @@
+@import url('./modal-tokens.css');
+
 body.modal-open {
   overflow: hidden;
 }
 
 .modal dialog::backdrop {
-  background-color: rgb(19 19 19 / 75%);
+  background-color: var(--modal-backdrop-background);
 }
 
 .modal dialog {
   overscroll-behavior: none;
   overflow-y: hidden;
-  width: calc(100vw - 48px);
-  max-width: 900px;
+  width: var(--modal-width-mobile);
+  max-width: var(--modal-max-width);
   max-height: calc(100dvh - (2 * var(--header-height)));
   padding: 0;
   border: 1px solid var(--dark-color);
@@ -22,19 +24,19 @@ body.modal-open {
   overscroll-behavior: none;
   width: 100%;
   max-height: calc(100dvh - (2 * var(--header-height)) - 48px);
-  padding: 24px;
+  padding: var(--modal-content-padding);
   padding-top: 0;
-  margin-top: 44px;
+  margin-top: var(--modal-content-margin-top);
 }
 
 @media (width >= 900px) {
   .modal dialog {
-    width: calc(100vw - 64px);
+    width: var(--modal-width-desktop);
   }
-  
+
   .modal dialog .modal-content {
     max-height: calc(100dvh - (2 * var(--header-height)) - 64px);
-    padding: 32px;
+    padding: var(--modal-content-padding-desktop);
     padding-top: 0;
   }
 }
@@ -43,8 +45,8 @@ body.modal-open {
   position: absolute;
   top: 0;
   right: 0;
-  width: 44px;
-  height: 44px;
+  width: var(--modal-close-button-size);
+  height: var(--modal-close-button-size);
   margin: 0;
   border: none;
   border-radius: 0;
@@ -56,8 +58,8 @@ body.modal-open {
 
 .modal .close-button .icon.icon-close {
   content: '';
-  width: 24px;
-  height: 24px;
+  width: var(--modal-close-icon-size);
+  height: var(--modal-close-icon-size);
 }
 
 .modal .close-button .icon.icon-close::before,
@@ -69,7 +71,7 @@ body.modal-open {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(45deg);
-  width: 24px;
+  width: var(--modal-close-icon-size);
   height: 2px;
   border-radius: 2px;
   background-color: currentcolor;

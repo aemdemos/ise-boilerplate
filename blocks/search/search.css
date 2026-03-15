@@ -1,3 +1,5 @@
+@import url('./search-tokens.css');
+
 /* search box */
 .search .search-box {
   display: grid;
@@ -12,12 +14,12 @@
   width: 100%;
   margin: 0;
   padding: 0.5em;
-  border-radius: 4px;
+  border-radius: var(--search-input-border-radius);
   border: 1px solid var(--dark-color);
   background-color: var(--background-color);
   color: var(--text-color);
   font-size: var(--body-font-size-s);
-  transition: border-color 0.2s;
+  transition: border-color var(--search-transition-duration);
 }
 
 .search .search-box input:hover {
@@ -27,14 +29,14 @@
 /* search results */
 .search ul.search-results {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(278px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(var(--search-results-min-width), 1fr));
+  gap: var(--search-results-gap);
   padding-left: 0;
   list-style: none;
 }
 
 .search ul.search-results > li {
-  border: 1px solid #dadada;
+  border: 1px solid var(--search-result-border-color);
 }
 
 .search ul.search-results > li > a {
@@ -52,7 +54,7 @@
 
 .search ul.search-results > li .search-result-title,
 .search ul.search-results > li p {
-  padding: 0 16px;
+  padding: 0 var(--search-result-content-padding);
 }
 
 .search ul.search-results > li .search-result-title {
@@ -82,7 +84,7 @@
 /* no results */
 .search ul.search-results.no-results {
   display: block;
-  margin-left: 34px;
+  margin-left: var(--search-no-results-indent);
 }
 
 .search ul.search-results.no-results > li {
@@ -92,7 +94,7 @@
 /* minimal variant */
 .search.minimal ul.search-results {
   display: block;
-  padding-left: 34px;
+  padding-left: var(--search-minimal-indent);
 }
 
 .search.minimal ul.search-results > li {
@@ -123,7 +125,7 @@
 .search.minimal ul.search-results > li .search-result-image {
   position: absolute;
   top: 2px;
-  left: -34px;
+  left: calc(-1 * var(--search-minimal-indent));
 }
 
 .search.minimal ul.search-results .search-result-title + p {
@@ -131,7 +133,7 @@
 }
 
 .search.minimal ul.search-results > li picture img {
-  height: 24px;
-  width: 24px;
+  height: var(--search-minimal-thumbnail-size);
+  width: var(--search-minimal-thumbnail-size);
   border-radius: 50%;
 }

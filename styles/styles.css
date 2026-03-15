@@ -37,10 +37,16 @@
   --heading-font-size-s: 24px;
   --heading-font-size-xs: 22px;
 
+  /* layout */
+  --max-width-site: 1200px;
+
   /* nav heights */
   --nav-height: 64px;
   --breadcrumbs-height: 34px;
   --header-height: var(--nav-height);
+
+  /* fixed-width / code */
+  --fixed-font-family: 'Roboto Mono', menlo, consolas, monospace;
 }
 
 /* fallback fonts */
@@ -140,6 +146,7 @@ blockquote {
 
 code,
 pre {
+  font-family: var(--fixed-font-family);
   font-size: var(--body-font-size-s);
 }
 
@@ -242,7 +249,7 @@ main > .section {
 }
 
 main > .section > div {
-  max-width: 1200px;
+  max-width: var(--max-width-site);
   margin: auto;
   padding: 0 24px;
 }

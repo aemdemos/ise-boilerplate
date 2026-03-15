@@ -1,8 +1,10 @@
+@import url('./embed-tokens.css');
+
 .embed {
   width: unset;
   text-align: center;
-  max-width: 800px;
-  margin: 32px auto;
+  max-width: var(--embed-max-width);
+  margin: var(--embed-margin);
 }
 
 .embed > div {
@@ -17,7 +19,7 @@
 
 .embed .embed-placeholder {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--embed-placeholder-aspect-ratio);
   position: relative;
 }
 
@@ -40,10 +42,10 @@
   position: relative;
   display: block;
   transform: scale(3);
-  width: 22px;
-  height: 22px;
+  width: var(--embed-placeholder-play-size);
+  height: var(--embed-placeholder-play-size);
   border: 2px solid;
-  border-radius: 20px;
+  border-radius: var(--embed-placeholder-play-border-radius);
   padding: 0;
 }
 
@@ -53,10 +55,10 @@
   box-sizing: border-box;
   position: absolute;
   width: 0;
-  height: 10px;
+  height: var(--embed-placeholder-play-triangle-height);
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-left: 6px solid;
+  border-left: var(--embed-placeholder-play-triangle-width) solid;
   top: 4px;
   left: 7px;
 }

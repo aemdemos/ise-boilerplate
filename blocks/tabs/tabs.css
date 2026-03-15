@@ -1,3 +1,5 @@
+@import url('./tabs-tokens.css');
+
 .tabs .tabs-list {
   display: flex;
   gap: 0.5ch;
@@ -21,7 +23,7 @@
 .tabs .tabs-list button {
   flex: 0 0 max-content;
   margin: 0;
-  border: 1px solid #dadada;
+  border: 1px solid var(--tabs-border-color);
   border-radius: 0;
   padding: 0.5em;
   background-color: var(--light-color);
@@ -32,7 +34,7 @@
   text-overflow: unset;
   overflow: unset;
   white-space: unset;
-  transition: background-color 0.2s;
+  transition: background-color var(--tabs-transition-duration);
 }
 
 .tabs .tabs-list button p {
@@ -48,8 +50,8 @@
 
 .tabs .tabs-panel {
   margin-top: -1px;
-  padding: 24px;
-  border: 1px solid #dadada;
+  padding: var(--tabs-panel-padding);
+  border: 1px solid var(--tabs-border-color);
   overflow: auto;
 }
 

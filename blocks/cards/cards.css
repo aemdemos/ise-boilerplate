@@ -1,19 +1,21 @@
+@import url('./cards-tokens.css');
+
 .cards > ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(257px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(var(--cards-grid-min-width), 1fr));
+  gap: var(--cards-grid-gap);
 }
 
 .cards > ul > li {
-  border: 1px solid #dadada;
+  border: var(--cards-card-border-width) solid var(--cards-card-border-color);
   background-color: var(--background-color);
 }
 
 .cards .cards-card-body {
-  margin: 16px;
+  margin: var(--cards-card-body-margin);
 }
 
 .cards .cards-card-image {
@@ -22,6 +24,6 @@
 
 .cards > ul > li img {
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  aspect-ratio: var(--cards-image-aspect-ratio);
+  object-fit: var(--cards-image-object-fit);
 }
