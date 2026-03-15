@@ -91,6 +91,77 @@ When facing trade-offs, follow this order: *Intuitive* (author-friendly) > *Simp
     - Use `.html` or `.plain.html` extensions
 - **Three-phase loading**: Pages load in phases for performance (eager → LCP, lazy → rest, delayed → martech); see `loadPage()` in `scripts.js`
 
+### JavaScript Pattern
+
+```javascript
+/**
+ * loads and decorates the block
+ * @param {Element} block The block element
+ */
+export default async function decorate(block) {
+  // 1. Read the DOM structure delivered by the backend
+  const rows = [...block.children];
+
+  // 2. Transform the DOM in place
+  rows.forEach((row) => {
+    const [imageCell, textCell] = [...row.children];
+    // ... transform cells
+  });
+
+  // 3. Add interactivity
+  block.addEventListener('click', handleClick);
+}
+```
+
+Key principles:
+- The `decorate` function receives the block `<div>` element
+- Transform DOM **in place** — don't rebuild from scratch when possible
+- Re-use existing elements (`<picture>`, headings, etc.) rather than recreating
+- Handle missing/optional content gracefully
+- Use `console.log(block.innerHTML)` to inspect what the backend sends
+- Always include `.js` extensions in imports
+
+### CSS Pattern
+
+```css
+/* All selectors MUST be scoped to the block */
+main .my-block {
+  /* Mobile-first base styles */
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+main .my-block h2 {
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
+}
+
+/* Tablet+ */
+@media (width >= 600px) {
+  main .my-block {
+    padding: 2rem;
+  }
+}
+
+/* Desktop+ */
+@media (width >= 900px) {
+  main .my-block {
+    flex-direction: row;
+    padding: 4rem;
+  }
+}
+```
+
+CSS rules:
+- **All selectors scoped to block**: `.my-block .item`, never just `.item`
+- **Mobile-first**: Base styles for mobile, `min-width` media queries for larger
+- **Breakpoints**: 600px (tablet), 900px (desktop), 1200px (wide) — use only what's needed
+- **CSS custom properties**: Use `var(--token)` for all colors, fonts, sizes
+- **No `-container` / `-wrapper`** class names — those conflict with section wrappers
+- **No Tailwind or frameworks** — vanilla CSS only
+
 ## Block architecture
 
 **File structure**: Every block lives in `blocks/{blockname}/` with two files: `{blockname}.css` and `{blockname}.js` (must export default `decorate(block)`).
@@ -116,7 +187,39 @@ export default async function decorate(block) {
 - CSS: Scope all selectors to the block. Bad: `.item-list`. Good: `.{blockname} .item-list`. 
 - Avoid `.{blockname}-container` and `.{blockname}-wrapper` (reserved for sections)
 
-**Auto-blocking**: Blocks can also be created programmatically from content patterns; see `buildAutoBlocks()` in `scripts.js`.
+**Block Variants**
+
+Block variants are CSS classes added to the block element by authors (e.g., `Hero (dark)` → `.hero.dark`):
+
+```css
+/* CSS-only variant — no JS needed */
+main .hero.dark {
+  background: var(--dark-color);
+  color: white;
+}
+
+/* JS-variant — when DOM structure changes */
+if (block.classList.contains('carousel')) {
+  setupCarousel(block);
+}
+```
+
+**Auto-Blocking**
+
+Create blocks automatically from content patterns in `scripts.js`:
+
+```javascript
+function buildAutoBlocks(main) {
+  // Example: auto-create hero from first H1 + picture
+  const h1 = main.querySelector('h1');
+  const picture = main.querySelector('picture');
+  if (h1 && picture && h1.closest('div') === picture.closest('div')) {
+    const section = h1.closest('div.section > div');
+    const heroBlock = buildBlock('hero', { elems: [picture, h1] });
+    section.prepend(heroBlock);
+  }
+}
+```
 
 ## Environments
 
