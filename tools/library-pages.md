@@ -7,20 +7,37 @@
 
 
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks.json
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/accordion
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/breadcrumbs
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/cards
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/card-carousel
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/carousel
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/columns
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/embed
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/form
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/fragment
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/hero
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocksmodal
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/quote
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/search
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/section-metadata
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/table
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/tabs
+
 https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/video
