@@ -84,6 +84,7 @@ module.exports = {
     'xwalk/max-cells': ['error', {
       section: 30, // section is a key-value block and over 4 is OK
     }],
+    'xwalk/no-custom-resource-types': 'info', // da won't have them
     // it's 2026, we can afford to have longer lines
     'max-len': ['error', { code: 220 }],
     // it's 2026
