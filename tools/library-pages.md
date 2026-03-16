@@ -1,9 +1,11 @@
 ## Set up your block library
 
 - First paste this list in the import tool https://da.live/apps/import
-- Then add them here to bulk preview: https://da.live/apps/bulk
+- Then edit the list so it has your URL on it (instead of the ise-boilerplate) and paste into bulk preview: https://da.live/apps/bulk
 - Then you have to "Add sheet" called "library" when you click on the gear icon of your root repo folder in da.live. Create columns called "title" and "path".
 - Enter "Blocks" for the title column, and "https://content.da.live/your-org/your-project/docs/library/blocks.json" for the path column value.
+- And finally, in your ExMod aemcoder settings, you will want to add the URL to your blocks so that the agent will refer to your blocks instead of the limited OOTB list https://main--your-org/your-project/docs/library/blocks.json.
+
 
 
 
