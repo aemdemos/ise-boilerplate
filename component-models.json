@@ -64,14 +64,14 @@
         "component": "richtext",
         "valueType": "string",
         "name": "summary",
-        "value": "",
+        "value": "summary",
         "label": "Summary",
         "required": true
       },
       {
         "component": "richtext",
         "name": "text",
-        "value": "",
+        "value": "text",
         "label": "Text",
         "valueType": "string",
         "required": true
@@ -203,6 +203,17 @@
         "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>a:nth-child(1)",
         "label": "Search URL Text",
         "valueType": "string"
+      }
+    ]
+  },
+  {
+    "id": "table",
+    "fields": [
+      {
+        "component": "richtext",
+        "name": "table",
+        "value": "",
+        "label": "Table Content"
       }
     ]
   },

@@ -54,6 +54,7 @@
           "filter": "accordion",
           "plugins": {
             "da": {
+              "name": "accordion",
               "rows": 0,
               "columns": 0
             }
@@ -200,6 +201,25 @@
             "da": {
               "rows": 1,
               "columns": 1
+            }
+          }
+        },
+        {
+          "title": "Table",
+          "id": "table",
+          "model": "table",
+          "filter": "table",
+          "plugins": {
+            "da": {
+              "name": "table",
+              "rows": 1,
+              "columns": 1,
+              "fields": [
+                {
+                  "name": "table",
+                  "selector": "div>div"
+                }
+              ]
             }
           }
         },
