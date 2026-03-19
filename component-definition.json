@@ -189,7 +189,7 @@
           "id": "quote",
           "plugins": {
             "da": {
-              "rows": 1,
+              "rows": 2,
               "columns": 1,
               "fields": [
                 {
