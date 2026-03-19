@@ -177,13 +177,13 @@
         "component": "richtext",
         "valueType": "string",
         "name": "quote",
-        "label": "Quote",
+        "label": "Quote text",
         "required": true
       },
       {
         "component": "richtext",
         "name": "author",
-        "label": "Author",
+        "label": "Author text",
         "valueType": "string"
       }
     ]

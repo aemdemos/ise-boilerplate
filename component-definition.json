@@ -200,7 +200,9 @@
                   "name": "author",
                   "selector": "div:nth-child(2)>div"
                 }
-              ]
+              ],
+              "quote": "Lorem Ipsum Quote",
+              "author": "Lorem Ipsum Author"
             }
           }
         },
