@@ -22,10 +22,12 @@ export default function decorate(block) {
   slidesWrapper.setAttribute('aria-label', 'Card carousel slides');
 
   if (!isSingleSlide) {
+    // eslint-disable-next-line
     const { indicatorsNav, buttonsContainer } = createSliderControls(rows.length, {
       indicatorsAriaLabel: `Card Carousel Slide Controls for ${blockId}`,
     });
-    block.append(indicatorsNav);
+    // uncomment if you want to show dot navigation
+    // block.append(indicatorsNav);
     container.append(buttonsContainer);
   }
 
@@ -50,8 +52,9 @@ export default function decorate(block) {
     initSlider(block, {
       slidesContainer: '.card-carousel-slides',
       slideSelector: '.card-carousel-slide',
-      indicatorsContainer: '.carousel-slide-indicators',
-      indicatorItemSelector: '.carousel-slide-indicator',
+      // uncomment if you want to show dot navigation
+      // indicatorsContainer: '.carousel-slide-indicators',
+      // indicatorItemSelector: '.carousel-slide-indicator',
       prevSelector: '.slide-prev',
       nextSelector: '.slide-next',
     });
@@ -63,8 +66,9 @@ export default function decorate(block) {
       showSlide(block, next, 'smooth', {
         slidesContainer: '.card-carousel-slides',
         slideSelector: '.card-carousel-slide',
-        indicatorsContainer: '.carousel-slide-indicators',
-        indicatorItemSelector: '.carousel-slide-indicator',
+        // uncomment if you want to show dot navigation
+        // indicatorsContainer: '.carousel-slide-indicators',
+        // indicatorItemSelector: '.carousel-slide-indicator',
         prevSelector: '.slide-prev',
         nextSelector: '.slide-next',
       });

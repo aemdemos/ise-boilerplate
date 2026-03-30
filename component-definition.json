@@ -17,10 +17,21 @@
         {
           "title": "Image",
           "id": "image",
+          "model": "image",
           "plugins": {
             "da": {
               "name": "image",
-              "type": "image"
+              "type": "image",
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "img[alt]"
+                }
+              ]
             }
           }
         }
@@ -167,20 +178,84 @@
           }
         },
         {
-          "title": "Fragment",
-          "id": "fragment",
+          "title": "Columns",
+          "id": "columns",
+          "model": "columns",
+          "filter": "columns",
           "plugins": {
             "da": {
-              "unsafeHTML": "<div class=\"fragment\"><div><div><p><a href=\"\">Fragment URL</a></p></div></div></div>"
+              "name": "columns",
+              "rows": 1,
+              "columns": 2,
+              "behaviour": "columns"
+            }
+          }
+        },
+        {
+          "title": "Columns Row",
+          "id": "columns-row",
+          "model": "columns-row",
+          "filter": "columns-row",
+          "plugins": {
+            "da": {
+              "name": "columns-row",
+              "behaviour": "columns-row"
+            }
+          }
+        },
+        {
+          "title": "Columns Cell",
+          "id": "columns-cell",
+          "model": "columns-cell",
+          "filter": "columns-cell",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>",
+              "behaviour": "columns-cell"
+            }
+          }
+        },
+        {
+          "title": "Fragment",
+          "id": "fragment",
+          "model": "fragment",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"fragment\"><div><div><p><a href=\"\">Fragment URL</a></p></div></div></div>",
+              "fields": [
+                {
+                  "name": "url",
+                  "selector": "div>div>p>a[href]"
+                },
+                {
+                  "name": "urlText",
+                  "selector": "div>div>p>a"
+                }
+              ]
             }
           }
         },
         {
           "title": "Hero",
           "id": "hero",
+          "model": "hero",
           "plugins": {
             "da": {
-              "unsafeHTML": "<div class=\"hero\"><div><div><picture><source type=\"image/webp\" srcset=\"\"><source type=\"image/jpeg\" srcset=\"\"><img loading=\"lazy\"></picture><h1></h1></div></div></div>"
+              "unsafeHTML": "<div class=\"hero\"><div><div><picture><source type=\"image/webp\" srcset=\"\"><source type=\"image/jpeg\" srcset=\"\"><img loading=\"lazy\"></picture><h1></h1></div></div></div>",
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div>div>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div>div>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div>div>h1"
+                }
+              ]
             }
           }
         },
@@ -208,10 +283,21 @@
         {
           "title": "Search",
           "id": "search",
+          "model": "search",
           "plugins": {
             "da": {
               "rows": 1,
-              "columns": 1
+              "columns": 1,
+              "fields": [
+                {
+                  "name": "searchUrl",
+                  "selector": "div>div>p>a[href]"
+                },
+                {
+                  "name": "searchUrlText",
+                  "selector": "div>div>p>a"
+                }
+              ]
             }
           }
         },
@@ -237,9 +323,11 @@
         {
           "title": "Tabs",
           "id": "tabs",
+          "model": "tabs",
           "plugins": {
             "da": {
-              "unsafeHTML": "<div class=\"tabs\"><div><div><p></p></div><div></div></div></div>"
+              "columns": 1,
+              "rows": 2
             }
           }
         },
@@ -248,17 +336,44 @@
           "id": "tabs-item",
           "plugins": {
             "da": {
-              "unsafeHTML": "<div><div><p></p></div><div></div></div>"
+              "columns": 0,
+              "rows": 2,
+              "fields": [
+                {
+                  "name": "name",
+                  "selector": "div:nth-child(1)"
+                },
+                {
+                  "name": "content",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
             }
           }
         },
         {
           "title": "Video",
           "id": "video",
+          "model": "video",
           "plugins": {
             "da": {
+              "name": "video",
               "rows": 1,
-              "columns": 1
+              "columns": 1,
+              "fields": [
+                {
+                  "name": "videoUrl",
+                  "selector": "div>div>p>a[href]"
+                },
+                {
+                  "name": "videoUrlText",
+                  "selector": "div>div>p>a"
+                },
+                {
+                  "name": "posterImage",
+                  "selector": "div>div>picture>img[src]"
+                }
+              ]
             }
           }
         }
