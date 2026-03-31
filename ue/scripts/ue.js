@@ -11,6 +11,7 @@
  */
 
 /* eslint-disable sonarjs/cognitive-complexity */
+import { resyncTabsBlock } from '../../blocks/tabs/tabs.js';
 import { showSlide } from '../../scripts/slider.js';
 import { moveInstrumentation } from './ue-utils.js';
 
@@ -79,7 +80,17 @@ const setupObservers = () => {
               }
             }
             break;
-          case 'tabs':
+          case 'tabs': {
+            const tablistEl = mutation.target.querySelector(':scope > .tabs-list');
+            const rowMutated = [...addedElements].some(
+              (n) => n.nodeType === Node.ELEMENT_NODE && n.parentElement === mutation.target && n !== tablistEl,
+            ) || [...removedElements].some(
+              (n) => n.nodeType === Node.ELEMENT_NODE && tablistEl && !tablistEl.contains(n),
+            );
+            if (rowMutated) {
+              resyncTabsBlock(mutation.target);
+            }
+
             if (removedElements.length === 1 && removedElements[0].attributes['data-aue-model']?.value === 'tabs-item') {
               const resourceAttr = removedElements[0].getAttribute('data-aue-resource');
               if (resourceAttr) {
@@ -114,6 +125,7 @@ const setupObservers = () => {
               }
             }
             break;
+          }
           default:
             break;
         }
