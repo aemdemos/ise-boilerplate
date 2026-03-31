@@ -31,7 +31,9 @@
   ],
   "models": [
     {
+      "title": "Accordion Item",
       "id": "accordion-item",
+      "model": "accordion-item",
       "fields": [
         {
           "component": "richtext",

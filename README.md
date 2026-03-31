@@ -21,12 +21,19 @@ Before using the aem-block-collection, we recommand you to go through the docume
 npm i
 ```
 
-## Linting
-max length lines for JS allows up to 220, and descending specificity for CSS has been disabled so the ExMod tool doesn't burn through tokens attempting to fix.
+Linting and security
+This project is using StyleLint and ESLint for Javascript. Our ESLint configuration includes 3 popular and reputable Javascript code quality and security plugins:
+
+- SonarSource eslint-plugin-sonarjs, a code quality analyzer for JavaScript and TypeScript within the Sonar ecosystem (https://github.com/SonarSource/SonarJS/blob/master/packages/jsts/src/rules/README.md#eslint-rules)
+- Interlace secure-coding plugin for general secure coding practices and OWASP compliance for JavaScript/TypeScript (https://eslint.interlace.tools/docs/security/plugin-secure-coding/rules)
+- Interlace browser-security for XSS, cookie, and DOM security rules for client-side JavaScript (https://eslint.interlace.tools/docs/security/plugin-browser-security/rules).
+
+They are included in this command, which is run automatically via a github action on every pull request:
 
 ```sh
 npm run lint
 ```
+
 
 ## Local development
 
