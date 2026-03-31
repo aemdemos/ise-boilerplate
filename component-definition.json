@@ -327,8 +327,8 @@
           "filter": "tabs",
           "plugins": {
             "da": {
-              "columns": 1,
-              "rows": 2
+              "columns": 0,
+              "rows": 0
             }
           }
         },
@@ -338,8 +338,8 @@
           "model": "tabs-item",
           "plugins": {
             "da": {
-              "columns": 0,
-              "rows": 2,
+              "columns": 2,
+              "rows": 1,
               "fields": [
                 {
                   "name": "name",
