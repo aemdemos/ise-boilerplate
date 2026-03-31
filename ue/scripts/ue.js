@@ -66,6 +66,50 @@ function handleTabsInstrumentation(mutation) {
   }
 }
 
+/**
+ * When tab rows are added or removed under div.tabs, rebuild the tablist (handles deletes from UE
+ * even when data-aue-model on mutation.target is not "tabs").
+ * @param {MutationRecord} mutation
+ * @returns {boolean} true if resync + instrumentation were scheduled asynchronously
+ */
+function scheduleTabsRowResyncIfNeeded(mutation) {
+  const tabsBlock = mutation.target.closest('div.tabs');
+  if (!tabsBlock) {
+    return false;
+  }
+
+  const tablistEl = tabsBlock.querySelector(':scope > .tabs-list');
+  const { addedNodes, removedNodes } = mutation;
+
+  const addedRow = [...addedNodes].some(
+    (n) => n.nodeType === Node.ELEMENT_NODE && n.parentElement === tabsBlock && n !== tablistEl,
+  );
+
+  const removedTabRow = [...removedNodes].some(
+    (n) => n.nodeType === Node.ELEMENT_NODE
+      && !(tablistEl?.contains(n))
+      && (
+        n.matches?.('.tabs-panel[role="tabpanel"]')
+        || n.getAttribute?.('role') === 'tabpanel'
+        || n.attributes?.['data-aue-model']?.value === 'tabs-item'
+      ),
+  );
+
+  if (!addedRow && !removedTabRow) {
+    return false;
+  }
+
+  loadTabsModule()
+    .then(({ resyncTabsBlock }) => {
+      resyncTabsBlock(tabsBlock);
+      handleTabsInstrumentation(mutation);
+    })
+    .catch(() => {
+      handleTabsInstrumentation(mutation);
+    });
+  return true;
+}
+
 const setupObservers = () => {
   const mutatingBlocks = document.querySelectorAll('div.cards, div.carousel, div.accordion, div.tabs');
   const observer = new MutationObserver((mutations) => {
@@ -73,6 +117,8 @@ const setupObservers = () => {
       if (mutation.type === 'childList' && mutation.target.tagName === 'DIV') {
         const addedElements = mutation.addedNodes;
         const removedElements = mutation.removedNodes;
+
+        const tabsRowResyncScheduled = scheduleTabsRowResyncIfNeeded(mutation);
 
         // detect the mutation type of the block or picture (for cards)
         const type = mutation.target.classList.contains('cards-card-image') ? 'cards-image' : mutation.target.attributes['data-aue-model']?.value;
@@ -131,28 +177,11 @@ const setupObservers = () => {
               }
             }
             break;
-          case 'tabs': {
-            const tablistEl = mutation.target.querySelector(':scope > .tabs-list');
-            const rowMutated = [...addedElements].some(
-              (n) => n.nodeType === Node.ELEMENT_NODE && n.parentElement === mutation.target && n !== tablistEl,
-            ) || [...removedElements].some(
-              (n) => n.nodeType === Node.ELEMENT_NODE && tablistEl && !tablistEl.contains(n),
-            );
-
-            if (rowMutated) {
-              loadTabsModule()
-                .then(({ resyncTabsBlock }) => {
-                  resyncTabsBlock(mutation.target);
-                  handleTabsInstrumentation(mutation);
-                })
-                .catch(() => {
-                  handleTabsInstrumentation(mutation);
-                });
-            } else {
+          case 'tabs':
+            if (!tabsRowResyncScheduled) {
               handleTabsInstrumentation(mutation);
             }
             break;
-          }
           default:
             break;
         }
