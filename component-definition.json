@@ -324,6 +324,7 @@
           "title": "Tabs",
           "id": "tabs",
           "model": "tabs",
+          "filter": "tabs",
           "plugins": {
             "da": {
               "columns": 1,
