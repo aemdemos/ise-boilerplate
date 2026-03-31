@@ -15,7 +15,7 @@ import { showSlide } from '../../scripts/slider.js';
 import { moveInstrumentation } from './ue-utils.js';
 
 const setupObservers = () => {
-  const mutatingBlocks = document.querySelectorAll('div.cards, div.carousel, div.accordion');
+  const mutatingBlocks = document.querySelectorAll('div.cards, div.carousel, div.accordion, div.tabs');
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList' && mutation.target.tagName === 'DIV') {
@@ -76,6 +76,41 @@ const setupObservers = () => {
                     moveInstrumentation(removedElements[0], targetSlide);
                   }
                 }
+              }
+            }
+            break;
+          case 'tabs':
+            if (removedElements.length === 1 && removedElements[0].attributes['data-aue-model']?.value === 'tabs-item') {
+              const resourceAttr = removedElements[0].getAttribute('data-aue-resource');
+              if (resourceAttr) {
+                const itemMatch = resourceAttr.match(/item-(\d+)/);
+                if (itemMatch && itemMatch[1]) {
+                  const tabIndex = parseInt(itemMatch[1], 10);
+                  const panels = mutation.target.querySelectorAll(':scope > .tabs-panel[role="tabpanel"]');
+                  const targetPanel = Array.from(panels).find((panel) => parseInt(panel.getAttribute('data-tab-index'), 10) === tabIndex);
+                  if (targetPanel) {
+                    moveInstrumentation(removedElements[0], targetPanel);
+                    const removed = removedElements[0];
+                    const addedName = targetPanel.querySelector(':scope > div:nth-child(1)');
+                    const addedContent = targetPanel.querySelector(':scope > div:nth-child(2)');
+                    const removedName = removed.querySelector(':scope > div:nth-child(1)');
+                    const removedContent = removed.querySelector(':scope > div:nth-child(2)');
+                    if (removedName && addedName) moveInstrumentation(removedName, addedName);
+                    if (removedContent && addedContent) moveInstrumentation(removedContent, addedContent);
+                  }
+                }
+              }
+            } else if (addedElements.length === 1 && addedElements[0].matches('div.tabs-panel[role="tabpanel"]')) {
+              const removed = removedElements[0];
+              const added = addedElements[0];
+              if (removed && removed.nodeType === 1) {
+                moveInstrumentation(removed, added);
+                const addedName = added.querySelector(':scope > div:nth-child(1)');
+                const addedContent = added.querySelector(':scope > div:nth-child(2)');
+                const removedName = removed.querySelector(':scope > div:nth-child(1)');
+                const removedContent = removed.querySelector(':scope > div:nth-child(2)');
+                if (removedName && addedName) moveInstrumentation(removedName, addedName);
+                if (removedContent && addedContent) moveInstrumentation(removedContent, addedContent);
               }
             }
             break;
