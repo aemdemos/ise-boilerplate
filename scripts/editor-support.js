@@ -1,3 +1,4 @@
+import { activateTabPanel } from '../ue/scripts/ue-utils.js';
 import { showSlide } from './slider.js';
 import {
   decorateBlock,
@@ -38,10 +39,10 @@ function setState(block, state) {
     showSlide(block, state, 'instant');
   }
   if (block.matches('.tabs')) {
-    const tabs = [...block.querySelectorAll('.tabs-panel')];
-    const index = tabs.findIndex((tab) => tab.dataset.aueResource === state);
-    if (index !== -1) {
-      block.querySelectorAll('.tabs-list button')[index]?.click();
+    const panel = [...block.querySelectorAll('.tabs-panel[role="tabpanel"]')]
+      .find((tab) => tab.dataset.aueResource === state);
+    if (panel) {
+      activateTabPanel(block, panel);
     }
   }
 }
@@ -154,7 +155,10 @@ function handleSelection(event) {
     }
 
     if (block && block.matches('.tabs')) {
-      setState(block, element.dataset.aueResource);
+      const panel = element.closest('.tabs-panel[role="tabpanel"]');
+      if (panel && block.contains(panel)) {
+        setState(block, panel.dataset.aueResource);
+      }
     }
   }
 }

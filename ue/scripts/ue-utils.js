@@ -43,3 +43,36 @@ export function moveInstrumentation(from, to) {
       .filter((attr) => attr.startsWith('data-aue-') || attr.startsWith('data-richtext-')),
   );
 }
+
+/**
+ * Shows one tab panel and syncs tab buttons without calling click() (avoids focus-driven scroll-to-top in UE preview).
+ * Keeps the tabs block in view similarly to carousel slide activation.
+ * @param {Element} blockEl - Root .tabs block
+ * @param {Element} panelEl - .tabs-panel[role="tabpanel"] owned by blockEl
+ */
+export function activateTabPanel(blockEl, panelEl) {
+  if (
+    !blockEl?.classList.contains('tabs')
+    || !panelEl?.matches?.('.tabs-panel[role="tabpanel"]')
+    || !blockEl.contains(panelEl)
+  ) {
+    return;
+  }
+  blockEl.querySelectorAll('[role=tabpanel]').forEach((p) => {
+    p.setAttribute('aria-hidden', 'true');
+  });
+  panelEl.setAttribute('aria-hidden', 'false');
+  const tablist = blockEl.querySelector('.tabs-list');
+  if (tablist) {
+    tablist.querySelectorAll('button').forEach((btn) => {
+      btn.setAttribute('aria-selected', 'false');
+    });
+  }
+  const tabBtn = blockEl.querySelector(`[aria-controls="${panelEl.id}"]`);
+  if (tabBtn) {
+    tabBtn.setAttribute('aria-selected', 'true');
+  }
+  requestAnimationFrame(() => {
+    blockEl.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+  });
+}

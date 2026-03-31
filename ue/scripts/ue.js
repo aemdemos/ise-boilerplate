@@ -12,7 +12,7 @@
 
 /* eslint-disable sonarjs/cognitive-complexity */
 import { showSlide } from '../../scripts/slider.js';
-import { moveInstrumentation } from './ue-utils.js';
+import { activateTabPanel, moveInstrumentation } from './ue-utils.js';
 
 /**
  * Load tabs resync only when needed. A static import of blocks/tabs/tabs.js would pull in scripts.js
@@ -230,17 +230,7 @@ const setupUEEventHandlers = () => {
               if (!panel) {
                 break;
               }
-              blockEl.querySelectorAll('[role=tabpanel]').forEach((p) => {
-                p.setAttribute('aria-hidden', true);
-              });
-              panel.setAttribute('aria-hidden', false);
-              blockEl.querySelector('.tabs-list').querySelectorAll('button').forEach((btn) => {
-                btn.setAttribute('aria-selected', false);
-              });
-              const tabBtn = blockEl.querySelector(`[aria-controls="${panel.id}"]`);
-              if (tabBtn) {
-                tabBtn.setAttribute('aria-selected', true);
-              }
+              activateTabPanel(blockEl, panel);
             }
             break;
           default:
