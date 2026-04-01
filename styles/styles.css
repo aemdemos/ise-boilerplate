@@ -245,13 +245,43 @@ main img {
 
 /* sections */
 main > .section {
-  margin: 40px 0;
+  padding: 40px 0;
+  margin: 0;
 }
 
-main > .section > div {
+main > .section > div:not(.bg-image) {
   max-width: var(--max-width-site);
   margin: auto;
   padding: 0 24px;
+}
+
+/* Section metadata: background image sits behind content */
+main > .section:has(> .bg-image) {
+  position: relative;
+  overflow: hidden;
+}
+
+main > .section:has(> .bg-image) > div:not(.bg-image) {
+  position: relative;
+  z-index: 1;
+}
+
+main > .section > .bg-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+main > .section > .bg-image picture,
+main > .section > .bg-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+main > .section > .bg-image img {
+  object-fit: cover;
 }
 
 main > .section:first-of-type {
@@ -259,7 +289,7 @@ main > .section:first-of-type {
 }
 
 @media (width >= 900px) {
-  main > .section > div {
+  main > .section > div:not(.bg-image) {
     padding: 0 32px;
   }
 }

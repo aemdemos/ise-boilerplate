@@ -219,6 +219,77 @@ export function decorateButtons(main) {
   });
 }
 
+/* === SECTIONS === */
+
+/** Metadata keys consumed by {@link applySectionBackgroundDecorations} (not mirrored as data-*). */
+const SECTION_BACKGROUND_META_KEYS = new Set(['background-color', 'background-image']);
+
+/**
+ * Rejects values that could break out of a single CSS declaration when set via inline style.
+ * @param {string} value Trimmed color value
+ * @returns {boolean}
+ */
+function isSafeBackgroundColorValue(value) {
+  if (!value || value.length > 500) return false; // CWE-770
+  if (/[;{}<>\n\r]/.test(value)) return false;
+  return true;
+}
+
+/**
+ * Allows only http(s) URLs for background images (same-origin relative paths resolve safely).
+ * Works with a dynamic media URL too.
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isAllowedBackgroundImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const u = new URL(url.trim(), window.location.href);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * First string from metadata (handles single link vs array from readBlockConfig).
+ * @param {unknown} value
+ * @returns {string}
+ */
+function metaStringValue(value) {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'string') return value[0];
+  return '';
+}
+
+/**
+ * Sets inline background-color and optionally prepends a decorative .bg-image layer.
+ * Keys match section model fields and {@link readBlockConfig}: `background-color`, `background-image`.
+ * @param {HTMLElement} section
+ * @param {Record<string, unknown>} meta
+ */
+function applySectionBackgroundDecorations(section, meta) {
+  const color = metaStringValue(meta['background-color']).trim();
+  if (color && isSafeBackgroundColorValue(color)) {
+    section.style.setProperty('background-color', color);
+  }
+
+  const imageUrl = metaStringValue(meta['background-image']).trim();
+  if (!imageUrl || !isAllowedBackgroundImageUrl(imageUrl)) return;
+
+  const bg = document.createElement('div');
+  bg.className = 'bg-image';
+  const picture = document.createElement('picture');
+  const img = document.createElement('img');
+  img.src = imageUrl;
+  img.alt = 'decorative background';
+  img.loading = 'lazy';
+  img.decoding = 'async'; // prevent blocking the main thread
+  picture.append(img);
+  bg.append(picture);
+  section.prepend(bg);
+}
+
 /**
  * Decorates all sections in a container element.
  * @param {Element} main The container element
@@ -270,14 +341,17 @@ export function decorateSections(main) {
             .filter((style) => style)
             .map((style) => toClassName(style.trim()));
           styles.forEach((style) => section.classList.add(style));
-        } else if (isSafeObjectKey(key)) {
+        } else if (isSafeObjectKey(key) && !SECTION_BACKGROUND_META_KEYS.has(key)) {
           section.setAttribute(`data-${key}`, String(value ?? ''));
         }
       });
+      applySectionBackgroundDecorations(section, meta);
       sectionMeta.parentNode.remove();
     }
   }
 }
+
+/* === END SECTIONS === */
 
 /**
  * Decorates the main element.

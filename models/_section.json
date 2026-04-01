@@ -35,6 +35,22 @@
               "value": "highlight"
             }
           ]
+        },
+        {
+          "component": "text",
+          "name": "background-color",
+          "label": "Background Color",
+          "value": "",
+          "valueType": "string",
+          "description": "use hex (e.g. #000000), RGB (e.g. rgb(0, 0, 0)) html color names or css tokens"
+        },
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "background-image",
+          "label": "Background Image",
+          "description": "Background image of the section, displayed on top of the background color if specified",
+          "multi": false
         }
       ]
     }
