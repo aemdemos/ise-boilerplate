@@ -64,7 +64,7 @@
         "description": "use hex (e.g. #000000), RGB (e.g. rgb(0, 0, 0)) html color names or css tokens"
       },
       {
-        "component": "reference",
+        "component": "text",
         "valueType": "string",
         "name": "background-image",
         "label": "Background Image",

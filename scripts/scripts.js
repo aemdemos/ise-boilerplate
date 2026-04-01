@@ -230,7 +230,7 @@ const SECTION_BACKGROUND_META_KEYS = new Set(['background-color', 'background-im
  * @returns {boolean}
  */
 function isSafeBackgroundColorValue(value) {
-  if (!value || value.length > 2000) return false;
+  if (!value || value.length > 500) return false; // CWE-770
   if (/[;{}<>\n\r]/.test(value)) return false;
   return true;
 }
