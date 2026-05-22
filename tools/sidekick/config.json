@@ -5,16 +5,6 @@
       "title": "Edit",
       "environments": [ "dev", "preview", "live" ],
       "event": "aemedit"
-    },
-    {
-      "id": "quick-edit",
-      "title": "Quick Edit",
-      "environments": [
-        "dev",
-        "preview",
-        "live"
-      ],
-      "event": "quick-edit"
     }
   ]
 }
