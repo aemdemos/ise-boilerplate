@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-/* from da-block-collection 
+/* from da-block-collection
 import { NX_ORIGIN } from './scripts.js';
 
 let expMod;
