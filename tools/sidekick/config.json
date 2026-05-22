@@ -11,7 +11,8 @@
       "title": "Quick Edit",
       "environments": [
         "dev",
-        "preview"
+        "preview",
+        "live"
       ],
       "event": "quick-edit"
     }
