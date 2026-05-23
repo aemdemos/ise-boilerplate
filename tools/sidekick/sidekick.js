@@ -1,39 +1,47 @@
-// import toggleScheduler from '../scheduler/scheduler.js';
-import initQuickEdit from '../quick-edit/quick-edit.js';
+/**
+ * Build the da.live content path (org/site/page) from sidekick state or the current URL.
+ * @param {object} [detail] Sidekick custom event detail
+ * @returns {string|undefined}
+ */
+function getDaContentPath(detail = {}) {
+  if (detail.status?.path) return detail.status.path;
 
-export default async function init(sk) {
-  // Handle button clicks
-  // sk.addEventListener('custom:scheduler', toggleScheduler);
-  sk.addEventListener('custom:quick-edit', initQuickEdit);
+  const loc = detail.location || window.location;
+  let { hostname } = loc;
+  if (hostname === 'localhost') {
+    const proxy = document.querySelector('meta[property="hlx:proxyUrl"]')?.content;
+    if (proxy) hostname = new URL(proxy).hostname;
+  }
 
-  // Show after all decoration is finished
+  const parts = hostname.split('.')[0].split('--');
+  const [, repo, owner] = parts;
+  if (!repo || !owner) return undefined;
+
+  let pathname = (loc.pathname || window.location.pathname).replace(/^\//, '');
+  if (!pathname) pathname = 'index';
+  return `${owner}/${repo}/${pathname}`;
+}
+
+/**
+ * Open the current page in DA Canvas (Universal Editor workspace).
+ * @param {CustomEvent} event
+ */
+function openExperienceWorkspace(event) {
+  const path = getDaContentPath(event.detail);
+  if (!path) return;
+  window.open(`https://da.live/canvas#/${path}`, '_blank', 'noopener,noreferrer');
+}
+
+function attachSidekickListeners(sk) {
+  sk.addEventListener('custom:experience-workspace', openExperienceWorkspace);
   sk.classList.add('is-ready');
 }
 
-/* eslint-disable import/no-cycle */
-/* from da-block-collection, not sure we need this
-import { NX_ORIGIN } from '../../scripts/scripts.js';
-
-let expMod;
-const DA_EXP = '/public/plugins/exp/exp.js';
-
-async function toggleExp() {
-  const exists = document.querySelector('#aem-sidekick-exp');
-
-  // If it doesn't exist, let module side effects run
-  if (!exists) {
-    expMod = await import(`${NX_ORIGIN}${DA_EXP}`);
-    return;
-  }
-
-  // Else, cache the module here and toggle it.
-  if (!expMod) expMod = await import(`${NX_ORIGIN}${DA_EXP}`);
-  expMod.default();
+const sk = document.querySelector('aem-sidekick');
+if (sk) {
+  attachSidekickListeners(sk);
+} else {
+  document.addEventListener('sidekick-ready', () => {
+    attachSidekickListeners(document.querySelector('aem-sidekick'));
+  }, { once: true });
 }
-
-(async function sidekick() {
-  const sk = document.querySelector('aem-sidekick');
-  if (!sk) return;
-  sk.addEventListener('custom:experimentation', toggleExp);
-}());
-*/
