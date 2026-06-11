@@ -44,3 +44,7 @@ npm run lint
 1. Open the `ise-boilerplate` directory in your favorite IDE and start coding :)
 
 This is a test change
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
