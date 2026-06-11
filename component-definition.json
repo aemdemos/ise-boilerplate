@@ -302,6 +302,52 @@
           }
         },
         {
+          "title": "Section Title",
+          "id": "section-title",
+          "model": "section-title",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"section-title\"><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div></div>",
+              "rows": 8,
+              "columns": 1,
+              "fields": [
+                {
+                  "name": "title",
+                  "selector": "div:nth-child(1)>div"
+                },
+                {
+                  "name": "titleType",
+                  "selector": "div:nth-child(2)>div"
+                },
+                {
+                  "name": "title-size",
+                  "selector": "div:nth-child(3)>div"
+                },
+                {
+                  "name": "alignment",
+                  "selector": "div:nth-child(4)>div"
+                },
+                {
+                  "name": "classes",
+                  "selector": "div:nth-child(5)>div"
+                },
+                {
+                  "name": "subtitle",
+                  "selector": "div:nth-child(6)>div"
+                },
+                {
+                  "name": "subtitleType",
+                  "selector": "div:nth-child(7)>div"
+                },
+                {
+                  "name": "subtitle-size",
+                  "selector": "div:nth-child(8)>div"
+                }
+              ]
+            }
+          }
+        },
+        {
           "title": "Table",
           "id": "table",
           "model": "table",
