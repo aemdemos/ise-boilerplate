@@ -132,3 +132,5 @@ chore/docs/…     → no release
 ```
 
 Merge to `main` → release happens automatically.
+
+This system can be configured according to Github's tagging system.
