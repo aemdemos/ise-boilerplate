@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/aemdemos/ise-boilerplate/compare/v0.1.0...v0.2.0) (2026-06-12)
+
+
+### Features
+
+* updating minor release number after adding sidekick library ([d6b8872](https://github.com/aemdemos/ise-boilerplate/commit/d6b8872746733d5a397b4606a2ee921d088f8ad5))
+
 # [0.1.0](https://github.com/aemdemos/ise-boilerplate/compare/v0.0.1...v0.1.0) (2026-06-12)
 
 
