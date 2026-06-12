@@ -1,22 +1,22 @@
 @import url('./footer-tokens.css');
 
-footer {
-  background-color: var(--light-color);
-  font-size: var(--body-font-size-xs);
+footer { /* @boilerplate */
+  background-color: var(--light-color); /* @boilerplate */
+  font-size: var(--body-font-size-xs); /* @boilerplate */
 }
 
-footer .footer > div {
-  margin: auto;
-  max-width: var(--footer-max-width);
-  padding: var(--footer-padding);
+footer .footer > div { /* @boilerplate */
+  margin: auto; /* @boilerplate */
+  max-width: var(--footer-max-width); /* @boilerplate */
+  padding: var(--footer-padding); /* @boilerplate */
 }
 
-footer .footer p {
-  margin: 0;
+footer .footer p { /* @boilerplate */
+  margin: 0; /* @boilerplate */
 }
 
-@media (width >= 900px) {
-  footer .footer > div {
-    padding: var(--footer-padding-desktop);
+@media (width >= 900px) { /* @boilerplate */
+  footer .footer > div { /* @boilerplate */
+    padding: var(--footer-padding-desktop); /* @boilerplate */
   }
 }

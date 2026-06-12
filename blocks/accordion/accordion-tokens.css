@@ -1,11 +1,13 @@
 /* accordion design tokens */
-:root {
-  --accordion-item-border-width: 1px;
-  --accordion-item-border-color: #dadada;
-  --accordion-item-gap: 24px;
-  --accordion-label-padding-x: 16px;
-  --accordion-label-padding-right: 46px;
-  --accordion-label-icon-right: 18px;
-  --accordion-body-padding-x: 16px;
-  --accordion-transition-duration: 0.2s;
+:root { /* @boilerplate */
+  --accordion-item-border-width: var(--border-width-s); /* @boilerplate */
+  --accordion-item-border-color: var(--border-color); /* @boilerplate */
+  --accordion-item-gap: var(--spacing-m); /* @boilerplate */
+  --accordion-label-padding-x: var(--spacing-s); /* @boilerplate */
+  --accordion-label-padding-right: 46px; /* @boilerplate */
+  --accordion-label-icon-right: 18px; /* @boilerplate */
+  --accordion-body-padding-x: var(--spacing-s); /* @boilerplate */
+  --accordion-icon-size: 6px; /* @boilerplate */
+  --accordion-icon-thickness: 2px; /* @boilerplate */
+  --accordion-transition-duration: var(--transition-duration); /* @boilerplate */
 }
