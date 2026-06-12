@@ -9,11 +9,13 @@
     "fix-css": " stylelint --fix **/**/*.css",
     "fix-js": "eslint --fix **/**/*.js",
     "lint": "npm run lint:js && npm run lint:css",
+    "test:a11y": "node tests/a11y/run.js",
     "build:json": "npm-run-all -p build:json:models build:json:definitions build:json:filters",
     "build:json:models": "merge-json-cli -i \"ue/models/component-models.json\" -o \"component-models.json\"",
     "build:json:definitions": "merge-json-cli -i \"ue/models/component-definition.json\" -o \"component-definition.json\"",
     "build:json:filters": "merge-json-cli -i \"ue/models/component-filters.json\" -o \"component-filters.json\"",
     "prepare": "husky",
+    "postinstall": "playwright install chromium",
     "release": "semantic-release"
   },
   "repository": {
@@ -55,6 +57,8 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^12.0.0",
-    "semantic-release": "^23.0.0"
+    "semantic-release": "^23.0.0",
+    "@playwright/test": "^1.44.0",
+    "@axe-core/playwright": "^4.9.0"
   }
 }
