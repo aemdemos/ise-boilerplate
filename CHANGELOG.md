@@ -1,3 +1,11 @@
+# [0.1.0](https://github.com/aemdemos/ise-boilerplate/compare/v0.0.1...v0.1.0) (2026-06-12)
+
+
+### Features
+
+* add automated a11y testing (Phase 1) ([463903f](https://github.com/aemdemos/ise-boilerplate/commit/463903f8ff646b485f637ae2a6f44ca4202a9896))
+* auto-install Chromium browser via postinstall script ([d54ca69](https://github.com/aemdemos/ise-boilerplate/commit/d54ca690b97fc43d34129312f2893e2c942e71d1))
+
 ## [0.0.1](https://github.com/aemdemos/ise-boilerplate/compare/v0.0.0...v0.0.1) (2026-06-11)
 
 
