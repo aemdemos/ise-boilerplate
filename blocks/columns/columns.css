@@ -1,35 +1,35 @@
 @import url('./columns-tokens.css');
 
-.columns > div {
-  display: flex;
-  flex-direction: column;
+.columns > div { /* @boilerplate */
+  display: flex; /* @boilerplate */
+  flex-direction: column; /* @boilerplate */
 }
 
-.columns img {
-  width: 100%;
+.columns img { /* @boilerplate */
+  width: 100%; /* @boilerplate */
 }
 
-.columns > div > div {
-  order: 1;
+.columns > div > div { /* @boilerplate */
+  order: 1; /* @boilerplate */
 }
 
-.columns > div > .columns-img-col {
-  order: 0;
+.columns > div > .columns-img-col { /* @boilerplate */
+  order: 0; /* @boilerplate */
 }
 
-.columns > div > .columns-img-col img {
-  display: block;
+.columns > div > .columns-img-col img { /* @boilerplate */
+  display: block; /* @boilerplate */
 }
 
-@media (width >= 900px) {
-  .columns > div {
-    align-items: center;
-    flex-direction: unset;
-    gap: var(--columns-gap);
+@media (width >= 900px) { /* @boilerplate */
+  .columns > div { /* @boilerplate */
+    align-items: center; /* @boilerplate */
+    flex-direction: unset; /* @boilerplate */
+    gap: var(--columns-gap); /* @boilerplate */
   }
 
-  .columns > div > div {
-    flex: 1;
-    order: unset;
+  .columns > div > div { /* @boilerplate */
+    flex: 1; /* @boilerplate */
+    order: unset; /* @boilerplate */
   }
 }

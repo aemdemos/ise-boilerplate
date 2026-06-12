@@ -1,18 +1,22 @@
 /* carousel design tokens */
-:root {
-  --carousel-content-margin: 68px;
-  --carousel-content-margin-desktop: 92px;
-  --carousel-content-padding: 16px;
-  --carousel-content-background: rgb(19 19 19 / 75%);
-  --carousel-indicators-gap: 6px 12px;
-  --carousel-indicators-padding: 12px;
-  --carousel-indicator-size: 24px;
-  --carousel-indicator-background: #dadada;
-  --carousel-indicator-active-background: var(--text-color);
-  --carousel-nav-inset: 12px;
-  --carousel-nav-inset-desktop: 24px;
-  --carousel-nav-button-size: 44px;
-  --carousel-nav-button-background: rgb(19 19 19 / 25%);
-  --carousel-nav-button-hover-background: rgb(19 19 19 / 75%);
-  --carousel-transition-duration: 0.2s;
+:root { /* @boilerplate */
+  --carousel-content-margin: 68px; /* @boilerplate */
+  --carousel-content-margin-desktop: 92px; /* @boilerplate */
+  --carousel-content-padding: var(--spacing-s); /* @boilerplate */
+  --carousel-content-color: white; /* @boilerplate */
+  --carousel-content-background: rgb(19 19 19 / 75%); /* @boilerplate */
+  --carousel-indicators-gap: 6px 12px; /* @boilerplate */
+  --carousel-indicators-padding: 12px; /* @boilerplate */
+  --carousel-indicator-size: 24px; /* @boilerplate */
+  --carousel-indicator-background: #dadada; /* @boilerplate */
+  --carousel-indicator-active-background: var(--text-color); /* @boilerplate */
+  --carousel-nav-inset: 12px; /* @boilerplate */
+  --carousel-nav-inset-desktop: var(--spacing-m); /* @boilerplate */
+  --carousel-nav-button-size: 44px; /* @boilerplate */
+  --carousel-nav-button-background: rgb(19 19 19 / 25%); /* @boilerplate */
+  --carousel-nav-button-hover-background: rgb(19 19 19 / 75%); /* @boilerplate */
+  --carousel-nav-arrow-size: 12px; /* @boilerplate */
+  --carousel-nav-arrow-thickness: 2px; /* @boilerplate */
+  --carousel-nav-arrow-offset: 2px; /* @boilerplate */
+  --carousel-transition-duration: var(--transition-duration); /* @boilerplate */
 }

@@ -1,38 +1,38 @@
 /* Section title: scoped to main; sizes use global heading tokens; text colors use :root palette tokens */
 
-main .section-title {
-  margin: 0;
-  padding: 0;
+main .section-title { /* @boilerplate */
+  margin: 0; /* @boilerplate */
+  padding: 0; /* @boilerplate */
 }
 
 main .section-title.size-xxl .title,
-main .section-title.subtitle-size-xxl .subtitle {
-  font-size: var(--heading-font-size-xxl);
+main .section-title.subtitle-size-xxl .subtitle { /* @boilerplate */
+  font-size: var(--heading-font-size-xxl); /* @boilerplate */
 }
 
 main .section-title.size-xl .title,
-main .section-title.subtitle-size-xl .subtitle {
-  font-size: var(--heading-font-size-xl);
+main .section-title.subtitle-size-xl .subtitle { /* @boilerplate */
+  font-size: var(--heading-font-size-xl); /* @boilerplate */
 }
 
 main .section-title.size-l .title,
-main .section-title.subtitle-size-l .subtitle {
-  font-size: var(--heading-font-size-l);
+main .section-title.subtitle-size-l .subtitle { /* @boilerplate */
+  font-size: var(--heading-font-size-l); /* @boilerplate */
 }
 
 main .section-title.size-m .title,
-main .section-title.subtitle-size-m .subtitle {
-  font-size: var(--heading-font-size-m);
+main .section-title.subtitle-size-m .subtitle { /* @boilerplate */
+  font-size: var(--heading-font-size-m); /* @boilerplate */
 }
 
 main .section-title.size-s .title,
-main .section-title.subtitle-size-s .subtitle {
-  font-size: var(--heading-font-size-s);
+main .section-title.subtitle-size-s .subtitle { /* @boilerplate */
+  font-size: var(--heading-font-size-s); /* @boilerplate */
 }
 
 main .section-title.size-xs .title,
-main .section-title.subtitle-size-xs .subtitle {
-  font-size: var(--heading-font-size-xs);
+main .section-title.subtitle-size-xs .subtitle { /* @boilerplate */
+  font-size: var(--heading-font-size-xs); /* @boilerplate */
 }
 
 /*
@@ -41,57 +41,57 @@ main .section-title.subtitle-size-xs .subtitle {
  * append the key to TEXT_COLOR_VAR_KEYS in section-title.js, and add a rule below.
  */
 main .section-title.section-title-color-background .title,
-main .section-title.section-title-color-background .subtitle {
-  color: var(--background-color);
+main .section-title.section-title-color-background .subtitle { /* @boilerplate */
+  color: var(--background-color); /* @boilerplate */
 }
 
 main .section-title.section-title-color-light .title,
-main .section-title.section-title-color-light .subtitle {
-  color: var(--light-color);
+main .section-title.section-title-color-light .subtitle { /* @boilerplate */
+  color: var(--light-color); /* @boilerplate */
 }
 
 main .section-title.section-title-color-dark .title,
-main .section-title.section-title-color-dark .subtitle {
-  color: var(--dark-color);
+main .section-title.section-title-color-dark .subtitle { /* @boilerplate */
+  color: var(--dark-color); /* @boilerplate */
 }
 
 main .section-title.section-title-color-text .title,
-main .section-title.section-title-color-text .subtitle {
-  color: var(--text-color);
+main .section-title.section-title-color-text .subtitle { /* @boilerplate */
+  color: var(--text-color); /* @boilerplate */
 }
 
 main .section-title.section-title-color-link .title,
-main .section-title.section-title-color-link .subtitle {
-  color: var(--link-color);
+main .section-title.section-title-color-link .subtitle { /* @boilerplate */
+  color: var(--link-color); /* @boilerplate */
 }
 
 main .section-title.section-title-color-link-hover .title,
-main .section-title.section-title-color-link-hover .subtitle {
-  color: var(--link-hover-color);
+main .section-title.section-title-color-link-hover .subtitle { /* @boilerplate */
+  color: var(--link-hover-color); /* @boilerplate */
 }
 
 main .section-title .title:has(.icon),
-main .section-title .subtitle:has(.icon) {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.25em;
+main .section-title .subtitle:has(.icon) { /* @boilerplate */
+  display: inline-flex; /* @boilerplate */
+  align-items: center; /* @boilerplate */
+  flex-wrap: wrap; /* @boilerplate */
+  gap: 0.25em; /* @boilerplate */
 }
 
-main .section-title .icon {
-  flex-shrink: 0;
-  height: 1em;
-  width: 1em;
-  vertical-align: middle;
+main .section-title .icon { /* @boilerplate */
+  flex-shrink: 0; /* @boilerplate */
+  height: 1em; /* @boilerplate */
+  width: 1em; /* @boilerplate */
+  vertical-align: middle; /* @boilerplate */
 }
 
-main .section-title .icon img {
-  height: 100%;
-  width: 100%;
-  object-fit: contain;
-  display: block;
+main .section-title .icon img { /* @boilerplate */
+  height: 100%; /* @boilerplate */
+  width: 100%; /* @boilerplate */
+  object-fit: contain; /* @boilerplate */
+  display: block; /* @boilerplate */
 }
 
-main .section-title.center { text-align: center; }
-main .section-title.right { text-align: right; }
-main .section-title.left { text-align: left; }
+main .section-title.center { text-align: center; } /* @boilerplate */
+main .section-title.right { text-align: right; } /* @boilerplate */
+main .section-title.left { text-align: left; } /* @boilerplate */

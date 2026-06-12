@@ -1,39 +1,39 @@
 @import url('./hero-tokens.css');
 
-.hero-container .hero-wrapper {
-  max-width: unset;
-  padding: 0;
+.hero-container .hero-wrapper { /* @boilerplate */
+  max-width: unset; /* @boilerplate */
+  padding: 0; /* @boilerplate */
 }
 
-.hero {
-  position: relative;
-  padding: var(--hero-padding);
-  min-height: var(--hero-min-height);
+.hero { /* @boilerplate */
+  position: relative; /* @boilerplate */
+  padding: var(--hero-padding); /* @boilerplate */
+  min-height: var(--hero-min-height); /* @boilerplate */
 }
 
-.hero h1 {
-  max-width: var(--hero-heading-max-width);
-  margin-left: auto;
-  margin-right: auto;
-  color: var(--background-color);
+.hero h1 { /* @boilerplate */
+  max-width: var(--hero-heading-max-width); /* @boilerplate */
+  margin-left: auto; /* @boilerplate */
+  margin-right: auto; /* @boilerplate */
+  color: var(--background-color); /* @boilerplate */
 }
 
-.hero picture {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  object-fit: cover;
-  box-sizing: border-box;
+.hero picture { /* @boilerplate */
+  position: absolute; /* @boilerplate */
+  z-index: -1; /* @boilerplate */
+  inset: 0; /* @boilerplate */
+  object-fit: cover; /* @boilerplate */
+  box-sizing: border-box; /* @boilerplate */
 }
 
-.hero img {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
+.hero img { /* @boilerplate */
+  object-fit: cover; /* @boilerplate */
+  width: 100%; /* @boilerplate */
+  height: 100%; /* @boilerplate */
 }
 
-@media (width >= 900px) {
-  .hero {
-    padding: var(--hero-padding-desktop);
+@media (width >= 900px) { /* @boilerplate */
+  .hero { /* @boilerplate */
+    padding: var(--hero-padding-desktop); /* @boilerplate */
   }
 }

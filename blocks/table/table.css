@@ -1,69 +1,69 @@
 @import url('./table-tokens.css');
 
-.table.block {
-  width: 100%;
-  overflow-x: auto;
+.table.block { /* @boilerplate */
+  width: 100%; /* @boilerplate */
+  overflow-x: auto; /* @boilerplate */
 }
 
-.table.block table {
-  width: 100%;
-  max-width: 100%;
-  border-collapse: collapse;
-  font-size: var(--body-font-size-xs);
+.table.block table { /* @boilerplate */
+  width: 100%; /* @boilerplate */
+  max-width: 100%; /* @boilerplate */
+  border-collapse: collapse; /* @boilerplate */
+  font-size: var(--body-font-size-xs); /* @boilerplate */
 }
 
-@media (width >= 600px) {
-  .table.block table {
-    font-size: var(--body-font-size-s);
+@media (width >= 600px) { /* @boilerplate */
+  .table.block table { /* @boilerplate */
+    font-size: var(--body-font-size-s); /* @boilerplate */
   }
 }
 
-@media (width >= 900px) {
-  .table.block table {
-    font-size: var(--body-font-size-m);
+@media (width >= 900px) { /* @boilerplate */
+  .table.block table { /* @boilerplate */
+    font-size: var(--body-font-size-m); /* @boilerplate */
   }
 }
 
-.table.block table thead tr {
-  border-top: var(--table-header-border-width) solid;
-  border-bottom: var(--table-header-border-width) solid;
+.table.block table thead tr { /* @boilerplate */
+  border-top: var(--table-header-border-width) solid; /* @boilerplate */
+  border-bottom: var(--table-header-border-width) solid; /* @boilerplate */
 }
 
-.table.block table tbody tr {
-  border-bottom: var(--table-row-border-width) solid;
+.table.block table tbody tr { /* @boilerplate */
+  border-bottom: var(--table-row-border-width) solid; /* @boilerplate */
 }
 
-.table.block table th {
-  font-weight: 700;
+.table.block table th { /* @boilerplate */
+  font-weight: 700; /* @boilerplate */
 }
 
 .table.block table th,
-.table.block table td {
-  padding: var(--table-cell-padding);
-  text-align: left;
+.table.block table td { /* @boilerplate */
+  padding: var(--table-cell-padding); /* @boilerplate */
+  text-align: left; /* @boilerplate */
 }
 
 .table table th p,
-.table table td p {
-  margin: 0;
+.table table td p { /* @boilerplate */
+  margin: 0; /* @boilerplate */
 }
 
-.table table td p + p {
-  margin-top: 0.25em;
+.table table td p + p { /* @boilerplate */
+  margin-top: 0.25em; /* @boilerplate */
 }
 
 /* no header variant */
-.table.block.no-header table tbody tr {
-  border-top: var(--table-row-border-width) solid;
+.table.block.no-header table tbody tr { /* @boilerplate */
+  border-top: var(--table-row-border-width) solid; /* @boilerplate */
 }
 
 /* striped variant */
-.table.block.striped tbody tr:nth-child(odd) {
-  background-color: var(--overlay-background-color);
+.table.block.striped tbody tr:nth-child(odd) { /* @boilerplate */
+  background-color: var(--overlay-background-color); /* @boilerplate */
 }
 
 /* bordered variant */
 .table.block.bordered table th,
-.table.block.bordered table td {
-  border: var(--table-row-border-width) solid;
+.table.block.bordered table td { /* @boilerplate */
+  border: var(--table-row-border-width) solid; /* @boilerplate */
 }
