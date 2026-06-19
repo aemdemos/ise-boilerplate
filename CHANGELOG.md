@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/aemdemos/ise-boilerplate/compare/v0.2.0...v0.2.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* read live PR description via GitHub API and validate After URL branch ([7a7883b](https://github.com/aemdemos/ise-boilerplate/commit/7a7883bf159a832db6dd92d7887608e8e0571a43))
+
 # [0.2.0](https://github.com/aemdemos/ise-boilerplate/compare/v0.1.0...v0.2.0) (2026-06-12)
 
 

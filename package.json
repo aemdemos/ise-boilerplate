@@ -1,7 +1,7 @@
 {
   "name": "@adobe/aem-block-collection",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Block collection for AEM",
   "scripts": {
     "lint:js": "eslint . --ext .json,.js,.mjs",
