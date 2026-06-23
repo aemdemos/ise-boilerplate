@@ -252,6 +252,14 @@ a:hover { /* @boilerplate */
   text-decoration: underline; /* @boilerplate */
 }
 
+.center {
+  text-align: center;
+
+  &.columns > div > div {
+    justify-content: center;
+  }
+}
+
 /* buttons */
 a.button,
 button { /* @boilerplate */

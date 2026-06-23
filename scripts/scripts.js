@@ -222,7 +222,7 @@ export function decorateButtons(main) {
 /* === SECTIONS === */
 
 /** Metadata keys consumed by {@link applySectionBackgroundDecorations} (not mirrored as data-*). */
-const SECTION_BACKGROUND_META_KEYS = new Set(['background-color', 'background-image']);
+const SECTION_BACKGROUND_META_KEYS = new Set(['background', 'background-color', 'background-image']);
 
 /**
  * Rejects values that could break out of a single CSS declaration when set via inline style.
@@ -236,7 +236,7 @@ function isSafeBackgroundColorValue(value) {
 }
 
 /**
- * Allows only http(s) URLs for background images (same-origin relative paths resolve safely).
+ * Allows https URLs for background images, plus http for localhost during local development.
  * Works with a dynamic media URL too.
  * @param {string} url
  * @returns {boolean}
@@ -245,7 +245,7 @@ function isAllowedBackgroundImageUrl(url) {
   if (!url || typeof url !== 'string') return false;
   try {
     const u = new URL(url.trim(), window.location.href);
-    return u.protocol === 'http:' || u.protocol === 'https:';
+    return u.protocol === 'https:' || (u.protocol === 'http:' && u.hostname === 'localhost');
   } catch {
     return false;
   }
@@ -269,9 +269,9 @@ function metaStringValue(value) {
  * @param {Record<string, unknown>} meta
  */
 function applySectionBackgroundDecorations(section, meta) {
-  const color = metaStringValue(meta['background-color']).trim();
+  const color = metaStringValue(meta['background-color']).trim() || metaStringValue(meta.background).trim();
   if (color && isSafeBackgroundColorValue(color)) {
-    section.style.setProperty('background-color', color);
+    section.style.setProperty('background', color);
   }
 
   const imageUrl = metaStringValue(meta['background-image']).trim();
