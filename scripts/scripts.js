@@ -269,7 +269,7 @@ function metaStringValue(value) {
  * @param {Record<string, unknown>} meta
  */
 function applySectionBackgroundDecorations(section, meta) {
-  const color = metaStringValue(meta['background-color']).trim() || metaStringValue(meta['background']).trim();
+  const color = metaStringValue(meta['background-color']).trim() || metaStringValue(meta.background).trim();
   if (color && isSafeBackgroundColorValue(color)) {
     section.style.setProperty('background', color);
   }
