@@ -221,9 +221,6 @@ export function decorateButtons(main) {
 
 /* === SECTIONS === */
 
-/** Metadata keys consumed by {@link applySectionBackgroundDecorations} (not mirrored as data-*). */
-const SECTION_BACKGROUND_META_KEYS = new Set(['background', 'background-color', 'background-image']);
-
 /**
  * Rejects values that could break out of a single CSS declaration when set via inline style.
  * @param {string} value Trimmed color value
@@ -268,7 +265,7 @@ function metaStringValue(value) {
  * @param {HTMLElement} section
  * @param {Record<string, unknown>} meta
  */
-function applySectionBackgroundDecorations(section, meta) {
+function applySectionBackgroundDecorations(section, meta = {}) {
   const color = metaStringValue(meta['background-color']).trim() || metaStringValue(meta.background).trim();
   if (color && isSafeBackgroundColorValue(color)) {
     section.style.setProperty('background', color);
@@ -277,11 +274,16 @@ function applySectionBackgroundDecorations(section, meta) {
   const imageUrl = metaStringValue(meta['background-image']).trim();
   if (!imageUrl || !isAllowedBackgroundImageUrl(imageUrl)) return;
 
+  // localhost never has a valid TLS cert; downgrade https → http so the request succeeds
+  const parsedUrl = new URL(imageUrl.trim(), window.location.href);
+  if (parsedUrl.hostname === 'localhost') parsedUrl.protocol = 'http:';
+  const safeImageUrl = parsedUrl.href;
+
   const bg = document.createElement('div');
   bg.className = 'bg-image';
   const picture = document.createElement('picture');
   const img = document.createElement('img');
-  img.src = imageUrl;
+  img.src = safeImageUrl;
   img.alt = 'decorative background';
   img.loading = 'lazy';
   img.decoding = 'async'; // prevent blocking the main thread
@@ -341,13 +343,19 @@ export function decorateSections(main) {
             .filter((style) => style)
             .map((style) => toClassName(style.trim()));
           styles.forEach((style) => section.classList.add(style));
-        } else if (isSafeObjectKey(key) && !SECTION_BACKGROUND_META_KEYS.has(key)) {
+        } else if (isSafeObjectKey(key)) {
           section.setAttribute(`data-${key}`, String(value ?? ''));
         }
       });
-      applySectionBackgroundDecorations(section, meta);
       sectionMeta.parentNode.remove();
     }
+
+    // Apply background decorations from data-* attributes (set via section-metadata or by the platform)
+    applySectionBackgroundDecorations(section, {
+      background: section.getAttribute('data-background') || '',
+      'background-color': section.getAttribute('data-background-color') || '',
+      'background-image': section.getAttribute('data-background-image') || '',
+    });
   }
 }
 
