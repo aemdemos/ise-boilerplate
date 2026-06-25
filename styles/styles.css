@@ -260,6 +260,22 @@ a:hover { /* @boilerplate */
   }
 }
 
+.left {
+  text-align: left;
+
+  &.columns > div > div {
+    justify-content: left;
+  }
+}
+
+.right {
+  text-align: right;
+
+  &.columns > div > div {
+    justify-content: right;
+  }
+}
+
 /* buttons */
 a.button,
 button { /* @boilerplate */
