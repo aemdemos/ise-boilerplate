@@ -539,8 +539,51 @@ function cleanAttributes(element) {
   });
 }
 
+function hoistAlignmentAcrossInlines(el) {
+  // Handles [[alignment-class]content] where content spans inline elements,
+  // causing the opening [[class] and closing ] to land in different text nodes.
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+  let n = walker.nextNode();
+  while (n) { textNodes.push(n); n = walker.nextNode(); }
+
+  for (let i = 0; i < textNodes.length - 1; i += 1) {
+    const node = textNodes[i];
+    const text = node.nodeValue;
+    const openIdx = text.lastIndexOf('[[');
+    if (openIdx === -1) continue; // eslint-disable-line no-continue
+
+    const tail = text.slice(openIdx);
+    // If the bracket expression is fully contained in this node, replaceTextNode handles it
+    if (/^\[\[[^\]]+\][^\]]*\]/.test(tail)) continue; // eslint-disable-line no-continue
+
+    // eslint-disable-next-line sonarjs/slow-regex
+    const classMatch = tail.match(/^\[\[([a-zA-Z0-9_,-]+)\]/);
+    if (!classMatch) continue; // eslint-disable-line no-continue
+
+    const classes = parseClasses(classMatch[1]);
+    const alignClasses = classes.filter((c) => ALIGNMENT_CLASSES.has(c));
+    // Only handle pure-alignment spanning patterns; mixed (alignment + span classes) needs Range API
+    if (!alignClasses.length || classes.length !== alignClasses.length) continue; // eslint-disable-line no-continue
+
+    for (let j = i + 1; j < textNodes.length; j += 1) {
+      const closeNode = textNodes[j];
+      const closeText = closeNode.nodeValue;
+      const closeIdx = closeText.indexOf(']');
+      if (closeIdx === -1) continue; // eslint-disable-line no-continue
+
+      el.classList.add(...alignClasses);
+      node.nodeValue = text.slice(0, openIdx) + tail.slice(classMatch[0].length);
+      closeNode.nodeValue = closeText.slice(0, closeIdx) + closeText.slice(closeIdx + 1);
+      break;
+    }
+  }
+}
+
 export function decorateSpanTags(element) {
   element.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li').forEach((el) => {
+    if (el.textContent.includes('[[')) hoistAlignmentAcrossInlines(el);
+
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     const nodes = [];
     let node = walker.nextNode();
