@@ -391,6 +391,9 @@ const SPLIT_OPEN_RE = /\[\[([a-z0-9,-]+)\]\s*$/;
 // eslint-disable-next-line sonarjs/slow-regex
 const BRACKET_RE = /\[\[[^\]]+\]([^\]]*)\]/g;
 
+// eslint-disable-next-line sonarjs/slow-regex
+const TOOLTIP_OPEN_RE = /\[\[tooltip\]\s*$/;
+
 function applySplitBoundaryPass(el) {
   const children = [...el.childNodes];
 
@@ -405,21 +408,39 @@ function applySplitBoundaryPass(el) {
     const isNextText = next.nodeType === Node.TEXT_NODE;
 
     if (isPrevText && isMidInline && isNextText) {
-      // Pattern A: "prefix[[classes]" <inline>content</inline> "]suffix"
-      const openMatch = prev.nodeValue.match(SPLIT_OPEN_RE);
-      const classes = openMatch ? parseSplitClasses(openMatch[1]) : [];
-      const closeMatch = openMatch && classes.length ? next.nodeValue.match(/^\s*\]/) : null;
-      if (closeMatch) {
-        const alignClasses = classes.filter((c) => ALIGNMENT_CLASSES.has(c));
-        const regularClasses = classes.filter((c) => !ALIGNMENT_CLASSES.has(c));
-        if (alignClasses.length) el.classList.add(...alignClasses);
-        prev.nodeValue = prev.nodeValue.slice(0, -openMatch[0].length);
-        next.nodeValue = next.nodeValue.slice(closeMatch[0].length);
-        if (regularClasses.length) {
-          const span = document.createElement('span');
-          span.className = regularClasses.join(' ');
-          span.appendChild(mid);
-          el.insertBefore(span, next);
+      // tooltip branch: [[tooltip]<a href="#" title="...">text</a>]
+      // The <a> is replaced entirely — not wrapped — with a <span data-tooltip="...">.
+      const isTooltipAnchor = mid.nodeName === 'A'
+        && mid.getAttribute('href') === '#'
+        && mid.getAttribute('title');
+      const tooltipCloseMatch = isTooltipAnchor && TOOLTIP_OPEN_RE.test(prev.nodeValue)
+        ? next.nodeValue.match(/^\s*\]/) : null;
+      if (tooltipCloseMatch) {
+        const span = document.createElement('span');
+        span.className = 'tooltip';
+        span.dataset.tooltip = mid.getAttribute('title');
+        span.textContent = mid.textContent;
+        el.insertBefore(span, mid);
+        el.removeChild(mid);
+        prev.nodeValue = prev.nodeValue.replace(TOOLTIP_OPEN_RE, '');
+        next.nodeValue = next.nodeValue.slice(tooltipCloseMatch[0].length);
+      } else {
+        // Pattern A: "prefix[[classes]" <inline>content</inline> "]suffix"
+        const openMatch = prev.nodeValue.match(SPLIT_OPEN_RE);
+        const classes = openMatch ? parseSplitClasses(openMatch[1]) : [];
+        const closeMatch = openMatch && classes.length ? next.nodeValue.match(/^\s*\]/) : null;
+        if (closeMatch) {
+          const alignClasses = classes.filter((c) => ALIGNMENT_CLASSES.has(c));
+          const regularClasses = classes.filter((c) => !ALIGNMENT_CLASSES.has(c));
+          if (alignClasses.length) el.classList.add(...alignClasses);
+          prev.nodeValue = prev.nodeValue.slice(0, -openMatch[0].length);
+          next.nodeValue = next.nodeValue.slice(closeMatch[0].length);
+          if (regularClasses.length) {
+            const span = document.createElement('span');
+            span.className = regularClasses.join(' ');
+            span.appendChild(mid);
+            el.insertBefore(span, next);
+          }
         }
       }
     } else if (!isPrevText && mid.nodeType === Node.TEXT_NODE && !isNextText && next.children.length === 0) {
