@@ -50,6 +50,8 @@ export const EMBED_DOMPURIFY = {
   ADD_ATTR: ['allow', 'allowfullscreen', 'scrolling', 'loading', 'frameborder'],
 };
 
+/* === START video autoblock from link === */
+
 const VIDEO_LINK_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'youtu.be', 'vimeo.com', 'www.vimeo.com']);
 
 /**
@@ -145,3 +147,4 @@ export function getVimeoEmbedHtml(url, autoplay = false, background = false) {
 <iframe src="${src}" style="${IFRAME_STYLE}" frameborder="0" allow="${allow}" allowfullscreen title="Content from Vimeo" loading="lazy"></iframe>
 </div>`;
 }
+/* === END video autoblock from link === */

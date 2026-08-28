@@ -141,6 +141,31 @@ async function loadFonts() {
 }
 
 /**
+ * Loads a bare `/fragments/` link's fragment and inserts it in place via replaceWithFragment.
+ * @param {Element} main The container element (used to find the link's raw section)
+ * @param {HTMLAnchorElement} fragment The bare fragment link
+ * @param {(path: string) => Promise<Element>} loadFragment
+ * @param {(el: Element, section: Element, fragment: Element) => void} replaceWithFragment
+ */
+async function insertFragmentLink(main, fragment, loadFragment, replaceWithFragment) {
+  try {
+    const { pathname } = new URL(fragment.href);
+    const frag = await loadFragment(pathname);
+    if (!frag) return;
+
+    // walk up to the raw (pre-decoration) section: a direct child of main
+    const p = fragment.parentElement;
+    let section = p;
+    while (section.parentElement !== main) section = section.parentElement;
+
+    replaceWithFragment(p, section, frag);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Fragment loading failed', error);
+  }
+}
+
+/**
  * Turns `/widgets/...` links into widget blocks.
  * added 20260610
  * @param {Element} main The container element
@@ -171,29 +196,20 @@ function buildWidgetAutoBlocks(main) {
  */
 function buildAutoBlocks(main) {
   try {
-    // auto load `*/fragments/*` references
-    const fragments = [...main.querySelectorAll('a[href*="/fragments/"]')].filter((f) => !f.closest('.fragment'));
-    if (fragments.length > 0) {
-      // eslint-disable-next-line import/no-cycle
-      import('../blocks/fragment/fragment.js').then(({ loadFragment }) => {
-        fragments.forEach(async (fragment) => {
-          try {
-            const { pathname } = new URL(fragment.href);
-            const frag = await loadFragment(pathname);
-            fragment.parentElement.replaceWith(...frag.children);
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Fragment loading failed', error);
-          }
+    // auto embed `*/fragments/*` links
+    if (FEATURES.fragmentLinks) {
+      const fragments = [...main.querySelectorAll('a[href*="/fragments/"]')].filter((f) => !f.closest('.fragment'));
+      if (fragments.length > 0) {
+        // eslint-disable-next-line import/no-cycle
+        import('../blocks/fragment/fragment.js').then(({ loadFragment, replaceWithFragment }) => {
+          fragments.forEach((fragment) => insertFragmentLink(main, fragment, loadFragment, replaceWithFragment));
         });
-      });
-      buildWidgetAutoBlocks(main);
+      }
     }
 
-    // auto-embed bare YouTube/Vimeo links, wherever they appear — default content, inside another
-    // block's cell, or in a fragment (skip links already inside an authored embed/video block).
-    // decorateBlock/loadBlock are called directly since the embed block may not be at the row/cell
-    // depth decorateBlocks() and loadSections() expect (e.g. nested inside a cards or columns cell).
+    buildWidgetAutoBlocks(main);
+
+    // auto-embed bare YouTube/Vimeo links, wherever they appear
     if (FEATURES.videoLinks) {
       const videoLinks = [...main.querySelectorAll('a[href]')]
         .filter((a) => !a.closest('.embed, .video') && isVideoLink(a.href));
@@ -254,78 +270,6 @@ export function decorateExternalLinks(element) {
 
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
-  });
-}
-
-/** Duration for the in-page anchor smooth scroll (matches xenazineusa.com). */
-const ANCHOR_SCROLL_DURATION_MS = 1000;
-
-const anchorEaseInOutQuad = (t) => (t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2);
-
-/**
- * Smooth-scrolls the window to a target Y with an explicit duration (native
- * smooth scroll speed is not configurable).
- * @param {number} targetY
- * @param {number} duration
- */
-function animatedScrollTo(targetY, duration = ANCHOR_SCROLL_DURATION_MS) {
-  const start = window.scrollY;
-  const distance = targetY - start;
-  if (distance === 0) return;
-  const startTime = performance.now();
-
-  const step = (now) => {
-    const progress = Math.min((now - startTime) / duration, 1);
-    window.scrollTo(0, start + distance * anchorEaseInOutQuad(progress));
-    if (progress < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
-/**
- * Resolves the in-page target for an anchor click, or null if the link is not
- * a same-page hash link (external, cross-page, or bare "#").
- * @param {HTMLAnchorElement} anchor
- * @returns {HTMLElement|null}
- */
-function inPageTarget(anchor) {
-  const href = anchor.getAttribute('href');
-  if (!href || href === '#' || !href.includes('#')) return null;
-
-  let url;
-  try {
-    url = new URL(href, window.location.href);
-  } catch {
-    return null;
-  }
-  // must resolve to the current page (same path) to be an in-page anchor
-  if (url.pathname !== window.location.pathname || !url.hash) return null;
-
-  const id = decodeURIComponent(url.hash.substring(1));
-  if (!id) return null;
-  return document.getElementById(id);
-}
-
-/**
- * Delegated smooth-scroll for in-page anchor links (e.g. nav cards that jump to
- * an on-page section). Matches the animated scroll on xenazineusa.com without
- * changing the URL hash (the source site scrolls without updating the URL).
- * Cross-page and external links are left untouched.
- * @param {Document|Element} scope
- */
-export function enableSmoothAnchorScroll(scope = document) {
-  scope.addEventListener('click', (e) => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const anchor = e.target.closest('a[href*="#"]');
-    if (!anchor) return;
-
-    const target = inPageTarget(anchor);
-    if (!target) return;
-
-    e.preventDefault();
-    const scrollMargin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
-    const targetY = target.getBoundingClientRect().top + window.scrollY - scrollMargin;
-    animatedScrollTo(targetY);
   });
 }
 
@@ -515,12 +459,6 @@ async function loadLazy(doc) {
 
   const main = doc.querySelector('main');
   await loadSections(main);
-
-  enableSmoothAnchorScroll(doc);
-
-  const { hash } = window.location;
-  const element = hash ? doc.getElementById(hash.substring(1)) : false;
-  if (hash && element) element.scrollIntoView();
 
   const loadQuickEdit = async (...args) => {
     // eslint-disable-next-line import/no-cycle

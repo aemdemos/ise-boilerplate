@@ -134,6 +134,10 @@
   src: local('Arial'); /* @boilerplate */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body { /* @boilerplate */
   display: none; /* @boilerplate */
   margin: 0; /* @boilerplate */

@@ -8,4 +8,5 @@ export default {
   themeSheet: false, // scripts/feature-flags/theme-sheet.js — loadThemeSpreadSheetConfig
   spanTags: true, // scripts/feature-flags/bracket-tags.js — decorateSpanTags, see docs/span-tags.md and docs/cell-class.md
   videoLinks: true, // scripts/scripts.js — buildAutoBlocks auto-embeds bare YouTube/Vimeo links
+  fragmentLinks: true, // scripts/scripts.js — buildAutoBlocks auto-loads bare `/fragments/` links
 };
