@@ -347,12 +347,23 @@ URL construction uses `{repo}` and `{owner}` from `gh repo view --json nameWithO
 - Use `AGENTS.override.md` at repo root for temporary or team-specific overrides
 - Use `AGENTS.local.md` at repo root for personal preferences; add it to `.gitignore` so it is not committed
 
-## Troubleshooting
+Edge Delivery Services. Read a block first. Omissions are in the repo or known.
 
-- Search with `site:www.aem.live`
-- [Developer Tutorial](https://www.aem.live/developer/tutorial)
-- [The Anatomy of a Project](https://www.aem.live/developer/anatomy-of-a-project)
-- [Best Practices](https://www.aem.live/docs/davidsmodel)
-- [Working with AI Agents](https://www.aem.live/developer/ai-coding-agents)
-- [AEM Documentation](https://www.aem.live/docs/)
-- Doc search: `curl -s https://www.aem.live/docpages-index.json | jq -r '.data[] | select(.content | test("KEYWORD"; "i")) | "\(.path): \(.title)"'`
+## Avoid
+- `scripts/aem.js` is vendored. Never edit.
+- Markup comes from the backend. `curl localhost:3000/x.plain.html` first.
+- `buildAutoBlocks` rewrites content before your block runs.
+- Authors omit and add cells. Decorate defensively.
+- No build step; devDependencies only.
+- Scope CSS to `.blockname`; `-wrapper`/`-container` are section classes.
+- `fragment/fragment.js` is the only cross-block import. Otherwise use `/scripts/`.
+
+## Outdated
+- `fstab.yaml`, `helix-query.yaml`, `paths.json` are retired. Config lives at tools.aem.live.
+
+## Remember
+- `npx -y @adobe/aem-cli up`: local code, previewed content.
+- Merging `main` ships code; content publishes separately.
+- A PR without a `{branch}--{repo}--{owner}.aem.page/{path}` link is rejected.
+- All committed files are served. Use `.hlxignore`.
+- Skills: `/plugin marketplace add adobe/skills`, then `aem-edge-delivery-services` (24 skills, incl. `docs-search`).

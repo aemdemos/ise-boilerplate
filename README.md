@@ -7,19 +7,20 @@ Your project's description...
 
 ## Special features of this repo
 
-- has both universal editor json for DA (enabled by default, see the /ue/ folder) as well as Xwalk for the blocks.
-- has AI-friendly block library pages, see /tools/library-pages.md for instructions on copying to your project
+- has both universal editor json for DA (enabled by default, see the `/ue/` folder) as well as Xwalk  (those _blockName.json files are in with the block folders, ignored by DA).
+- has EMA-friendly block library pages, see `/tools/library-pages.md` for instructions on copying to your project
 - more security and code quality items are addressed than the original boilerplate
-- feature flags (most are on) for handy features are configurable in the /scripts/feature-flags/features.js
+- feature flags (most are on) for handy features are configurable in the `/scripts/feature-flags/features.js`
 - Feature: section metadata can have background-color, background-image, or even use a gradient with "background".
 - you can set 2 sections to show side by side with the style=flex in section metadata
-- Feature: add span tags with classes to text elements, see /docs/span-tags.md
-- Feature: add css classes for alignments, widths, and 'hide-mobile'/'hide-desktop', see /docs/cell-class.md
-- Feature: You can nest blocks/embed a section in a block using the same bracket notation (ex. https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/nested-blocks ). See /docs/nested-sections.md
+- Feature: add span tags with classes to text elements, see `/docs/span-tags.md`
+- Feature: add css classes for alignments, widths, and 'hide-mobile'/'hide-desktop', see `/docs/cell-class.md`
+- Feature: You can nest blocks/embed a section in a block using the same bracket notation (ex. https://main--ise-boilerplate--aemdemos.aem.page/docs/library/blocks/nested-blocks ). See `/docs/nested-sections.md`
 - You can embed a fragment, youtube or vimeo video just by using the URL
 - automatically load a page via a modal just by linking to it in the /modals folder
+- Separation of `/scripts/slider.js` is re-usedfor both Carousel and Card-carousel blocks, while the separate `/blocks/card` block (not for authoring directly) is re-used for both Cards and Card-carousel blocks
 - Feature: You can handle CSS themes without touching code by overwriting tokens in a styles sheet in then authoring. (TO DO: document this feature)
-- There is also automatic basic accessibility testing against the "after" URL via github actions on every PR. See /docs/a11y-testing.
+- There is also automatic basic accessibility testing against the "after" URL via github actions on every PR. See `/docs/a11y-testing`
 
 ## Installation
 

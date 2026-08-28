@@ -1,5 +1,3 @@
-/* eslint-disable secure-coding/no-insecure-comparison
--- this is browser-side EDS code, not Node server auth logic. Not secret material; public DOM/content metadata validation. */
 import {
   loadHeader,
   loadFooter,
@@ -24,6 +22,33 @@ import { decorateSpanTags } from './feature-flags/bracket-tags.js';
 import { isVideoLink } from './utils.js';
 import FEATURES from './feature-flags/features.js';
 
+if (window.trustedTypes && window.trustedTypes.createPolicy) {
+  const innerTT = window.trustedTypes.createPolicy('tt-inner', {
+    createHTML: (s) => s, // avoid stack overflow
+  });
+
+  window.trustedTypes.createPolicy('default', {
+    createHTML: (input, type, sink) => {
+      let processedInput = input;
+      if (/srcdoc\s*=/i.test(processedInput)) {
+        // eslint-disable-next-line secure-coding/no-xxe-injection -- false positive: browser DOMParser in 'text/html' mode never fetches DTDs/external entities, unlike the Node XML parsers this rule targets
+        const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
+        doc.querySelectorAll('iframe[srcdoc]').forEach((el) => el.removeAttribute('srcdoc'));
+        processedInput = doc.body.innerHTML;
+      }
+      if (sink.includes('createContextualFragment') || sink.includes('Document write')) {
+        // eslint-disable-next-line secure-coding/no-xxe-injection -- false positive: browser DOMParser in 'text/html' mode never fetches DTDs/external entities, unlike the Node XML parsers this rule targets
+        const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
+        doc.querySelectorAll('script').forEach((el) => el.remove());
+        processedInput = doc.body.innerHTML;
+      }
+      return processedInput;
+    },
+    createScriptURL: (input) => input,
+    createScript: (input) => input,
+  });
+}
+
 /** Set max sections/children to process (CWE-770). */
 const MAX_SECTIONS = 100;
 const MAX_SECTION_CHILDREN = 200;
@@ -37,6 +62,7 @@ const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
  * @returns {boolean}
  */
 function isSafeObjectKey(key) {
+  /* eslint-disable-next-line secure-coding/no-insecure-comparison -- Not secret material; public DOM/content metadata validation. */
   return typeof key === 'string' && key.length > 0
     && !UNSAFE_OBJECT_KEYS.has(key)
     && !key.startsWith('__');
@@ -115,6 +141,31 @@ async function loadFonts() {
 }
 
 /**
+ * Turns `/widgets/...` links into widget blocks.
+ * added 20260610
+ * @param {Element} main The container element
+ */
+function buildWidgetAutoBlocks(main) {
+  const widgetLinks = [...main.querySelectorAll('a[href*="/widgets/"]')];
+  widgetLinks.forEach((link) => {
+    if (link.closest('.widget')) return;
+    const newLink = link.cloneNode(true);
+    const widgetBlock = buildBlock('widget', { elems: [newLink] });
+    const p = link.closest('p');
+    if (
+      p
+      && p.querySelectorAll('a').length === 1
+      && p.querySelector('a') === link
+      && p.textContent.trim() === link.textContent.trim()
+    ) {
+      p.replaceWith(widgetBlock);
+    } else {
+      link.replaceWith(widgetBlock);
+    }
+  });
+}
+
+/**
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
  */
@@ -136,6 +187,7 @@ function buildAutoBlocks(main) {
           }
         });
       });
+      buildWidgetAutoBlocks(main);
     }
 
     // auto-embed bare YouTube/Vimeo links, wherever they appear — default content, inside another
@@ -385,6 +437,7 @@ export function decorateSections(main) {
     if (sectionMeta) {
       const meta = readBlockConfig(sectionMeta);
       Object.entries(meta).forEach(([key, value]) => {
+        /* eslint-disable-next-line secure-coding/no-insecure-comparison -- Not secret material; public DOM/content metadata validation. */
         if (key === 'style') {
           const styleStr = typeof value === 'string' ? value : '';
           const styles = styleStr
@@ -495,8 +548,8 @@ async function loadLazy(doc) {
     if (hasQE) import('../tools/quick-edit/quick-edit.js').then((mod) => mod.default());
   })();
 
-  loadHeader(doc.querySelector('header'));
-  loadFooter(doc.querySelector('footer'));
+  loadHeader(doc.querySelector('body > header'));
+  loadFooter(doc.querySelector('body > footer'));
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();
@@ -507,14 +560,7 @@ async function loadLazy(doc) {
  * without impacting the user experience.
  */
 function loadDelayed() {
-  const importDelayed = () => import('./delayed.js');
-
-  if ('requestIdleCallback' in window) {
-    // prevents INP/TBT issues by only loading when CPU has capacity
-    window.requestIdleCallback(importDelayed, { timeout: 3000 });
-  } else {
-    window.setTimeout(importDelayed, 3000); // fallback 3-second timeout
-  }
+  import('./consent-check.js');
 }
 
 /* DA specific sidekick */

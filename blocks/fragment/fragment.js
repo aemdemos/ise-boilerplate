@@ -8,7 +8,6 @@
 import {
   decorateMain,
   ensureDOMPurify,
-  moveInstrumentation,
 } from '../../scripts/scripts.js';
 
 import {
@@ -62,12 +61,19 @@ export default async function decorate(block) {
   const link = block.querySelector('a');
   const path = link ? link.getAttribute('href') : block.textContent.trim();
   const fragment = await loadFragment(path);
-  if (fragment) {
-    const fragmentSection = fragment.querySelector(':scope .section');
-    if (fragmentSection) {
-      block.closest('.section').classList.add(...fragmentSection.classList);
-      moveInstrumentation(block, block.parentElement);
-      block.closest('.fragment').replaceWith(...fragment.childNodes);
-    }
+  if (!fragment) return;
+
+  const wrapper = block.closest('.fragment-wrapper');
+  const section = wrapper.closest('.section');
+
+  if (section && section.children.length === 1) {
+    // fragment is the ONLY child of its section; replace the whole section
+    section.replaceWith(...fragment.childNodes);
+  } else {
+    // fragment shares section with other children; flatten children into it
+    fragment.querySelectorAll(':scope > .section').forEach((fragSection) => {
+      [...fragSection.childNodes].forEach((child) => wrapper.before(child));
+    });
+    wrapper.remove();
   }
 }
