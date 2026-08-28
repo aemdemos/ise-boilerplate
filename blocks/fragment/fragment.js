@@ -8,6 +8,7 @@
 import {
   decorateMain,
   ensureDOMPurify,
+  moveInstrumentation,
 } from '../../scripts/scripts.js';
 
 import {
@@ -82,6 +83,7 @@ export default async function decorate(block) {
   const link = block.querySelector('a');
   const path = link ? link.getAttribute('href') : block.textContent.trim();
   const fragment = await loadFragment(path);
+  moveInstrumentation(block, block.parentElement);
   if (!fragment) return;
 
   const wrapper = block.closest('.fragment-wrapper');
