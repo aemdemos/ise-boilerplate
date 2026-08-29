@@ -56,18 +56,36 @@ export async function loadFragment(path) {
 }
 
 /**
+ * Replaces a section with a loaded fragment, or flattens the fragment's content into
+ * place when the section has other content. Shared by the fragment block and by
+ * scripts.js' auto-blocking of bare `/fragments/` links.
+ * @param {Element} elementToRemove The element to remove/insert-before when flattening
+ * @param {Element} section The (possibly decorated) section containing elementToRemove
+ * @param {HTMLElement} fragment The loaded fragment's root element
+ */
+export function replaceWithFragment(elementToRemove, section, fragment) {
+  if (section && section.children.length === 1) {
+    // fragment is the ONLY child of its section; replace the whole section
+    section.replaceWith(...fragment.childNodes);
+  } else {
+    // fragment shares its section with other content; flatten children into it
+    fragment.querySelectorAll(':scope > .section').forEach((fragSection) => {
+      [...fragSection.childNodes].forEach((child) => elementToRemove.before(child));
+    });
+    elementToRemove.remove();
+  }
+}
+
+/**
  * @param {Element} block
  */
 export default async function decorate(block) {
   const link = block.querySelector('a');
   const path = link ? link.getAttribute('href') : block.textContent.trim();
   const fragment = await loadFragment(path);
-  if (fragment) {
-    const fragmentSection = fragment.querySelector(':scope .section');
-    if (fragmentSection) {
-      block.closest('.section').classList.add(...fragmentSection.classList);
-      moveInstrumentation(block, block.parentElement);
-      block.closest('.fragment').replaceWith(...fragment.childNodes);
-    }
-  }
+  moveInstrumentation(block, block.parentElement);
+  if (!fragment) return;
+
+  const wrapper = block.closest('.fragment-wrapper');
+  replaceWithFragment(wrapper, wrapper.closest('.section'), fragment);
 }
