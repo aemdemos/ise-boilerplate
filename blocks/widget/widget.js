@@ -44,7 +44,6 @@ function applyWidgetShell(widget, source, widgetName, searchParams) {
   widget.classList.remove('block');
   widget.dataset.source = source.href;
   searchParams.forEach((value, key) => {
-    // eslint-disable-next-line secure-coding/detect-object-injection -- false positive: dataset writes are data-* attrs, not plain props, so this can't pollute Object.prototype
     widget.dataset[key] = value;
   });
 
