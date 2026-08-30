@@ -4,6 +4,7 @@
  * https://www.hlx.live/developer/block-collection/embed
  */
 import { DOMPURIFY } from '../../scripts/aem.js';
+import { ensureDOMPurify } from '../../scripts/scripts.js';
 import { getYoutubeEmbedHtml, getVimeoEmbedHtml, EMBED_DOMPURIFY } from '../../scripts/utils.js';
 
 const loadScript = (url, callback, type) => {
@@ -34,7 +35,7 @@ const embedTwitter = (url) => {
   return embedHTML;
 };
 
-const loadEmbed = (block, link, autoplay) => {
+const loadEmbed = async (block, link, autoplay) => {
   if (block.classList.contains('embed-is-loaded')) {
     return;
   }
@@ -55,21 +56,20 @@ const loadEmbed = (block, link, autoplay) => {
   ];
   const config = EMBEDS_CONFIG.find((e) => e.match.some((match) => link.includes(match)));
   const url = new URL(link);
+  await ensureDOMPurify();
   if (config) {
     const embedHtml = config.embed(url, autoplay);
-    block.innerHTML = (window.DOMPurify?.sanitize(embedHtml, EMBED_DOMPURIFY))
-      ?? embedHtml;
+    block.innerHTML = window.DOMPurify.sanitize(embedHtml, EMBED_DOMPURIFY);
     block.classList = `block embed embed-${config.match[0]}`;
   } else {
     const defaultHtml = getDefaultEmbed(url);
-    block.innerHTML = (window.DOMPurify?.sanitize(defaultHtml, EMBED_DOMPURIFY))
-      ?? defaultHtml;
+    block.innerHTML = window.DOMPurify.sanitize(defaultHtml, EMBED_DOMPURIFY);
     block.classList = 'block embed';
   }
   block.classList.add('embed-is-loaded');
 };
 
-export default function decorate(block) {
+export default async function decorate(block) {
   const placeholder = block.querySelector('picture');
   const link = block.querySelector('a').href;
   block.textContent = '';
@@ -78,8 +78,8 @@ export default function decorate(block) {
     const wrapper = document.createElement('div');
     wrapper.className = 'embed-placeholder';
     const placeholderHtml = '<div class="embed-placeholder-play"><button type="button" title="Play"></button></div>';
-    wrapper.innerHTML = (window.DOMPurify?.sanitize(placeholderHtml, DOMPURIFY))
-      ?? placeholderHtml;
+    await ensureDOMPurify();
+    wrapper.innerHTML = window.DOMPurify.sanitize(placeholderHtml, DOMPURIFY);
     wrapper.prepend(placeholder);
     wrapper.addEventListener('click', () => {
       loadEmbed(block, link, true);
