@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "chai": "5.3.3",
+    "chai": "6.2.2",
     "enhanced-resolve": "^5.19.0",
     "@eslint/js": "10.0.1",
     "eslint": "10.9.1",
