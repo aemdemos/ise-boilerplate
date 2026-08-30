@@ -62,7 +62,6 @@ const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
  * @returns {boolean}
  */
 function isSafeObjectKey(key) {
-  /* eslint-disable-next-line secure-coding/no-insecure-comparison -- Not secret material; public DOM/content metadata validation. */
   return typeof key === 'string' && key.length > 0
     && !UNSAFE_OBJECT_KEYS.has(key)
     && !key.startsWith('__');
@@ -381,7 +380,6 @@ export function decorateSections(main) {
     if (sectionMeta) {
       const meta = readBlockConfig(sectionMeta);
       Object.entries(meta).forEach(([key, value]) => {
-        /* eslint-disable-next-line secure-coding/no-insecure-comparison -- Not secret material; public DOM/content metadata validation. */
         if (key === 'style') {
           const styleStr = typeof value === 'string' ? value : '';
           const styles = styleStr
@@ -530,7 +528,6 @@ loadPage();
 const { searchParams, origin } = new URL(window.location.href);
 const branch = searchParams.get('nx') || 'main';
 
-/* eslint-disable browser-security/detect-mixed-content -- CWE-311: OWASP:A04-Cryptographic */
 export const NX_ORIGIN = branch === 'local' || origin.includes('localhost') ? 'http://localhost:6456/nx' : 'https://da.live/nx';
 
 (async function loadDa() {

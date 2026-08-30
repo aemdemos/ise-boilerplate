@@ -1,5 +1,3 @@
-/* eslint-disable secure-coding/no-insecure-comparison
--- this is browser-side EDS code, not Node server auth logic. Not secret material; public DOM/content metadata validation. */
 import { moveInstrumentation, getBlockId } from '../../scripts/scripts.js';
 import { createSliderControls, initSlider, showSlide } from '../../scripts/slider.js';
 
