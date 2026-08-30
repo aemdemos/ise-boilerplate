@@ -31,13 +31,11 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
     createHTML: (input, type, sink) => {
       let processedInput = input;
       if (/srcdoc\s*=/i.test(processedInput)) {
-        // eslint-disable-next-line secure-coding/no-xxe-injection -- false positive: browser DOMParser in 'text/html' mode never fetches DTDs/external entities, unlike the Node XML parsers this rule targets
         const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
         doc.querySelectorAll('iframe[srcdoc]').forEach((el) => el.removeAttribute('srcdoc'));
         processedInput = doc.body.innerHTML;
       }
       if (sink.includes('createContextualFragment') || sink.includes('Document write')) {
-        // eslint-disable-next-line secure-coding/no-xxe-injection -- false positive: browser DOMParser in 'text/html' mode never fetches DTDs/external entities, unlike the Node XML parsers this rule targets
         const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
         doc.querySelectorAll('script').forEach((el) => el.remove());
         processedInput = doc.body.innerHTML;

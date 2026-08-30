@@ -118,7 +118,6 @@ export function applySpanTags(text) {
   return text.replace(SPAN_TAG_RE, (match, raw, content) => {
     const classes = parseClasses(raw);
     if (!classes.length) return match;
-    // eslint-disable-next-line secure-coding/no-improper-sanitization
     const safe = content
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

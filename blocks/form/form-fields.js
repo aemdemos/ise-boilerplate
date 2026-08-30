@@ -3,7 +3,6 @@ import { toClassName } from '../../scripts/aem.js';
 function createFieldWrapper(fd) {
   const fieldWrapper = document.createElement('div');
   if (fd.Style) fieldWrapper.className = fd.Style;
-  // eslint-disable-next-line secure-coding/no-ldap-injection -- false positive: classList.add() is DOM class manipulation, not an LDAP operation; this project has no LDAP client
   fieldWrapper.classList.add('field-wrapper', `${fd.Type}-wrapper`);
 
   fieldWrapper.dataset.fieldset = fd.Fieldset;
