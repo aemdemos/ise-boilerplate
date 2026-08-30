@@ -47,7 +47,7 @@
     "globals": "17.6.0",
     "husky": "9.1.7",
     "merge-json-cli": "^1.0.4",
-    "npm-run-all2": "^5.0.0",
+    "npm-run-all2": "^9.0.3",
     "stylelint": "17.14.1",
     "stylelint-config-standard": "40.0.0",
     "ts-api-utils": "^2.4.0",
